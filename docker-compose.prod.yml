@@ -1,0 +1,60 @@
+
+services:
+  backend-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: teniola-backend-prod
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.production
+    environment:
+      - DJANGO_SETTINGS_MODULE=teniola_site.settings
+    volumes:
+      - ./backend/media:/app/media
+      - ./backend/core:/app/core
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    networks:
+      - teniola-prod-network
+    command: ["gunicorn", "--config", "gunicorn.conf.py", "teniola_site.wsgi:application"]
+
+  frontend-build:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: teniola-frontend-build
+    # Runs once to build frontend -> outputs to shared volume
+    command: [ "sh", "-c", "npm run build" ]
+    volumes:
+      - frontend_build:/app/dist
+    networks:
+      - teniola-prod-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: teniola-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/letsencrypt/live/teniolaokunlola.com:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+      - frontend_build:/app/dist:ro
+    networks:
+      - teniola-prod-network
+    depends_on:
+      - backend-prod
+      - frontend-build
+
+volumes:
+  static_volume:
+  media_volume:
+  frontend_build:
+
+networks:
+  teniola-prod-network:
+    driver: bridge

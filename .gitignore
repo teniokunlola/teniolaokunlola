@@ -1,0 +1,106 @@
+# Firebase service account keys
+backend/core/firebase_service_account.json
+**/firebase_service_account.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Frontend env files
+frontend/.env.example
+frontend/.env.production
+frontend/.env.local
+frontend/.env.development
+
+# Backend env files
+backend/.env.example
+backend/.env.production
+backend/.env.local
+backend/.env.development
+
+# Docker
+docker-compose.dev.yml
+# keep docker-compose.prod.yml tracked for deployment
+
+# Scripts
+scripts/
+
+# Nginx
+nginx/ssl/                  # SSL certs stay ignored
+nginx/ssl-setup.md
+# keep nginx/nginx.conf tracked for deployment
+
+# Frontend build
+frontend/dist/
+
+# Root environment files
+.env
+.env.example
+.env.local
+.env.dev
+.env.development
+.env.production
+
+# IDEs/editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+
+# Python / Django
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Production files
+.env.example
+.env.production
+*.production.*
+gunicorn.conf.py
+server.log
+logs/
+staticfiles/
+media/
+
+# Database
+*.sqlite3
+*.db
+db_backup_*.sqlite3
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini

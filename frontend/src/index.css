@@ -1,0 +1,440 @@
+@import 'tailwindcss';
+@import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Radio+Canada:ital,wght@0,300..700;1,300..700');
+@import url('https://fonts.cdnfonts.com/css/raleway-5');
+
+@custom-variant dark (&:is(.dark *));
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(0.98 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(0.98 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.25 0.08 280);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.25 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.25 0 0);
+  --destructive: oklch(0.65 0.2 25);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.25 0.08 280);
+  --chart-1: oklch(0.25 0.08 280);
+  --chart-2: oklch(0.6 0.12 200);
+  --chart-3: oklch(0.4 0.07 150);
+  --chart-4: oklch(0.8 0.15 80);
+  --chart-5: oklch(0.75 0.15 60);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-primary: oklch(0.25 0.08 280);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.25 0 0);
+  --sidebar-border: oklch(0.9 0 0);
+  --sidebar-ring: oklch(0.25 0.08 280);
+}
+
+.dark {
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.25 0.08 280);
+  --primary-foreground: oklch(0.08 0 0);
+  --secondary: oklch(0.18 0 0);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.18 0 0);
+  --accent-foreground: oklch(0.95 0 0);
+  --destructive: oklch(0.7 0.18 20);
+  --border: oklch(0.25 0 0 / 20%);
+  --input: oklch(0.25 0 0 / 25%);
+  --ring: oklch(0.25 0.08 280);
+  --chart-1: oklch(0.25 0.08 280);
+  --chart-2: oklch(0.6 0.12 200);
+  --chart-3: oklch(0.4 0.07 150);
+  --chart-4: oklch(0.8 0.15 80);
+  --chart-5: oklch(0.75 0.15 60);
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.25 0.08 280);
+  --sidebar-primary-foreground: oklch(0.08 0 0);
+  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.25 0 0 / 20%);
+  --sidebar-ring: oklch(0.25 0.08 280);
+}
+
+/* Apply dark mode background to body element */
+.dark body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Ensure body background matches theme */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== GLOBAL SCROLLBAR REMOVAL ===== */
+/* Hide scrollbars everywhere */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* ===== CLIENT-SIDE THEMING (Home.tsx, etc.) ===== */
+/* These styles work with the Home.tsx theme toggle system */
+.client-theme {
+  /* Client theme specific variables can go here */
+  --client-primary: oklch(0.25 0.08 280);
+  --client-primary-light: oklch(0.35 0.08 280);
+  --client-primary-dark: oklch(0.15 0.08 280);
+  --client-secondary: oklch(0.18 0 0);
+  --client-accent: oklch(0.6 0.12 200);
+  --client-success: oklch(0.6 0.12 150);
+  --client-warning: oklch(0.8 0.15 80);
+  --client-error: oklch(0.7 0.18 20);
+}
+
+
+/* ===== ADMIN-SIDE THEMING ===== */
+/* Admin-specific theme enhancements - only applied to admin pages */
+.admin-theme {
+  --admin-primary: oklch(0.25 0.08 280);
+  --admin-primary-light: oklch(0.35 0.08 280);
+  --admin-primary-dark: oklch(0.15 0.08 280);
+  --admin-secondary: var(--muted);
+  --admin-accent: oklch(0.6 0.12 200);
+  --admin-success: oklch(0.6 0.12 150);
+  --admin-warning: oklch(0.8 0.15 80);
+  --admin-error: oklch(0.7 0.18 20);
+}
+
+/* Custom scrollbar for admin pages */
+.admin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.25 0.08 280);
+  border-radius: 4px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.35 0.08 280);
+}
+
+/* Dark mode scrollbar */
+.dark .admin-scrollbar::-webkit-scrollbar-track {
+  background: oklch(0.12 0 0);
+}
+
+.dark .admin-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.25 0.08 280);
+}
+
+.dark .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.35 0.08 280);
+}
+
+/* Admin card hover effects */
+.admin-card {
+  transition: all 0.3s ease;
+  border: 1px solid var(--border);
+}
+
+.admin-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Admin header - no hover effects */
+.admin-header {
+  transition: none;
+  border: 1px solid var(--border);
+}
+
+.admin-header:hover {
+  border-color: var(--border);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Admin button styles */
+.admin-btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--admin-primary-light) 100%);
+  border: none;
+  color: var(--primary-foreground);
+  transition: all 0.3s ease;
+}
+
+.admin-btn-primary:hover {
+  background: linear-gradient(135deg, var(--admin-primary-light) 0%, var(--primary) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+/* Admin sidebar enhancements */
+.admin-sidebar {
+  background: var(--background);
+  border-right: 1px solid var(--border);
+}
+
+.admin-sidebar-item {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 2px 8px;
+}
+
+.admin-sidebar-item:hover {
+  background: rgba(147, 51, 234, 0.1);
+  color: rgb(147, 51, 234);
+  transform: translateX(4px);
+}
+
+.admin-sidebar-item.active {
+  background: rgb(147, 51, 234);
+  color: white;
+  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.3);
+}
+
+/* Enhanced styles for collapsed sidebar */
+.admin-sidebar[data-collapsed="true"] .admin-sidebar-item,
+.admin-sidebar.collapsed .admin-sidebar-item {
+  margin: 4px;
+  padding: 12px 8px;
+}
+
+.admin-sidebar[data-collapsed="true"] .admin-sidebar-item:hover,
+.admin-sidebar.collapsed .admin-sidebar-item:hover {
+  transform: scale(1.05);
+  background: rgba(147, 51, 234, 0.15);
+}
+
+.admin-sidebar[data-collapsed="true"] .admin-sidebar-item svg,
+.admin-sidebar.collapsed .admin-sidebar-item svg {
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Ensure proper icon sizing in collapsed state */
+.admin-sidebar[data-collapsed="true"] .admin-sidebar-item .w-5,
+.admin-sidebar.collapsed .admin-sidebar-item .w-5 {
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  min-height: 1.25rem;
+}
+
+/* Admin table styles */
+.admin-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.admin-table th {
+  background: var(--muted);
+  color: var(--foreground);
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--muted);
+}
+
+/* Admin form styles */
+.admin-form-input {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  transition: all 0.3s ease;
+}
+
+.admin-form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+}
+
+.admin-form-input:hover {
+  border-color: var(--admin-primary-light);
+}
+
+/* Admin badge styles */
+.admin-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-badge-primary {
+  background: var(--admin-primary);
+  color: var(--primary-foreground);
+}
+
+.admin-badge-success {
+  background: var(--admin-success);
+  color: white;
+}
+
+.admin-badge-warning {
+  background: var(--admin-warning);
+  color: white;
+}
+
+.admin-badge-error {
+  background: var(--admin-error);
+  color: white;
+}
+
+/* Admin loading states */
+.admin-loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: admin-spin 1s ease-in-out infinite;
+}
+
+@keyframes admin-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Admin animations */
+.admin-fade-in {
+  animation: admin-fade-in 0.5s ease-in-out;
+}
+
+@keyframes admin-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-slide-in {
+  animation: admin-slide-in 0.3s ease-out;
+}
+
+@keyframes admin-slide-in {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive admin utilities */
+@media (max-width: 768px) {
+  .admin-responsive-hide {
+    display: none;
+  }
+  
+  .admin-mobile-stack {
+    flex-direction: column;
+  }
+  
+  .admin-mobile-full {
+    width: 100%;
+  }
+}
+
+/* Admin focus states */
+.admin-focus-ring:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Admin selection styles */
+.admin-selection::selection {
+  background: var(--admin-primary);
+  color: var(--primary-foreground);
+}
+
+/* Admin print styles */
+@media print {
+  .admin-no-print {
+    display: none !important;
+  }
+  
+  .admin-print-break {
+    page-break-before: always;
+  }
+}
