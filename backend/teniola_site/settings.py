@@ -13,7 +13,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable is required for production")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # Ensure ALLOWED_HOSTS includes your domain, www version, localhost, and server IP
