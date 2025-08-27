@@ -22,5 +22,5 @@ FROM alpine:3.18
 WORKDIR /dist
 COPY --from=build /app/dist .
 
-# This image only contains static files
-CMD ["sh", "-c", "echo 'Frontend build container. Files are in /dist' && sleep infinity"]
+# Keep container running for volume mounting
+CMD ["sh", "-c", "echo 'Frontend build completed successfully' && tail -f /dev/null"]
