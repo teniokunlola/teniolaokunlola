@@ -12,14 +12,12 @@ if [ ! -f "docker-compose.prod.yml" ]; then
 fi
 
 # Load production environment variables
-if [ ! -f ".env.production" ]; then
-    echo "❌ Error: .env.production not found. Please create it with your production values."
+if [ ! -f "backend/.env.production" ]; then
+    echo "❌ Error: backend/.env.production not found. Please create it with your production values."
     exit 1
 fi
 
-source .env.production
-
-echo "📋 Environment loaded: $NODE_ENV"
+echo "📋 Environment file found"
 
 # Stop any running containers
 echo "🛑 Stopping existing containers..."
@@ -38,7 +36,7 @@ docker-compose -f docker-compose.prod.yml up -d
 
 # Wait for services to be ready
 echo "⏳ Waiting for services to be ready..."
-sleep 30
+sleep 45
 
 # Check service health
 echo "🏥 Checking service health..."
@@ -48,14 +46,18 @@ else
     echo "❌ Frontend health check failed"
 fi
 
-if curl -f http://localhost:8000/api/health/ > /dev/null 2>&1; then
-    echo "✅ Backend is healthy"
+if curl -f http://localhost/api/health/ > /dev/null 2>&1; then
+    echo "✅ Backend API is healthy"
 else
-    echo "❌ Backend health check failed"
+    echo "❌ Backend API health check failed"
 fi
 
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Frontend: http://localhost"
-echo "🔧 Backend API: http://localhost:8000/api/"
+echo "🔧 Backend API: http://localhost/api/"
 echo "📊 Container status:"
 docker-compose -f docker-compose.prod.yml ps
+
+echo ""
+echo "🔍 To view logs: docker-compose -f docker-compose.prod.yml logs -f [service-name]"
+echo "🔄 To restart: docker-compose -f docker-compose.prod.yml restart"

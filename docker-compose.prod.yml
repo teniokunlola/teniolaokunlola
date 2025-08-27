@@ -9,7 +9,7 @@ services:
     env_file:
       - ./backend/.env.production
     environment:
-      - DJANGO_SETTINGS_MODULE=teniola_site.settings
+      - DJANGO_SETTINGS_MODULE=teniola_site.settings_production
     volumes:
       - ./backend/media:/app/media
       - ./backend/core:/app/core
@@ -17,7 +17,13 @@ services:
       - media_volume:/app/media
     networks:
       - teniola-prod-network
-    command: ["gunicorn", "--config", "gunicorn.conf.py", "teniola_site.wsgi:application"]
+    command: ["gunicorn", "--config", "gunicorn.conf.py", "teniola_site.wsgi_production:application"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend-build:
     build:
@@ -47,8 +53,15 @@ services:
     networks:
       - teniola-prod-network
     depends_on:
-      - backend-prod
-      - frontend-build
+      backend-prod:
+        condition: service_healthy
+      frontend-build:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   static_volume:
