@@ -18,15 +18,26 @@ Icon
 
 # Frontend env files
 frontend/.env.example
+frontend/.env
+frontend/.env.dev
 frontend/.env.production
 frontend/.env.local
 frontend/.env.development
 
 # Backend env files
 backend/.env.example
+backend/.env
 backend/.env.production
 backend/.env.local
 backend/.env.development
+
+# Root environment files
+.env
+.env.example
+.env.local
+.env.dev
+.env.development
+.env.production
 
 # Docker
 docker-compose.dev.yml
@@ -40,28 +51,31 @@ nginx/ssl/                  # SSL certs stay ignored
 nginx/ssl-setup.md
 # keep nginx/nginx.conf tracked for deployment
 
-# Frontend build
+# Frontend build and dependencies
 frontend/dist/
+frontend/node_modules/
+node_modules/
 
-# Root environment files
-.env
-.env.example
-.env.local
-.env.dev
-.env.development
-.env.production
+# Backend build artifacts
+backend/staticfiles/
+backend/media/
+backend/logs/
 
 # IDEs/editors
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 
 # Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
 # Runtime data
 pids
@@ -72,6 +86,7 @@ pids
 # Coverage
 coverage/
 *.lcov
+.nyc_output
 
 # Python / Django
 *.pyc
@@ -84,23 +99,60 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Production files
-.env.example
-.env.production
 *.production.*
 gunicorn.conf.py
 server.log
-logs/
-staticfiles/
-media/
 
 # Database
 *.sqlite3
 *.db
 db_backup_*.sqlite3
+*.sqlite3-*
 
-# Windows
+# Cache and temporary files
+.cache/
+.tmp/
+.temp/
+*.tmp
+*.temp
+
+# OS generated files
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+$RECYCLE.BIN/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build tools
+.eslintcache
+.stylelintcache
+.parcel-cache
+.next/
+.nuxt/
+dist/
+build/
+
+# Environment and secrets
+.secrets
+.secret
+secrets/
+secret/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# Local development
+.local/
+local/
