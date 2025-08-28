@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from '@/context/AuthContext';
 import { Toaster } from 'sonner';
-import Loading from './pages/Loading';
+// import Loading from './pages/Loading';
 import SignupWithInvite from './pages/admin/SignupWithInvite';
 import Login from './pages/admin/Login';
 
@@ -36,7 +36,7 @@ const App: React.FC = () => (
       <div className="min-h-screen">
         <Routes>
           {/* Loading Route */}
-          <Route path="/loading" element={<Loading />} />
+          {/* <Route path="/loading" element={<Loading />} /> */}
           {/* About Route */}
           <Route path="/about" element={<About />} />
           {/* Contact Route */}

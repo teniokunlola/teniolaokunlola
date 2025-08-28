@@ -208,7 +208,7 @@ const Login: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            Secure access to your portfolio management
+            You're back! Login To Get Started.
           </motion.p>
         </motion.div>
 
