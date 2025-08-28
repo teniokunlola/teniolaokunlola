@@ -157,8 +157,8 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  const getGrowthIcon = (growth: string) => {
-    if (growth.startsWith('+')) {
+  const getGrowthIcon = (growth?: string) => {
+    if (typeof growth === 'string' && growth.startsWith('+')) {
       return <TrendingUp className="w-4 h-4 text-green-500" />;
     }
     return <TrendingDown className="w-4 h-4 text-red-500" />;
