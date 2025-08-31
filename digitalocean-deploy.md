@@ -57,10 +57,10 @@ chmod +x /usr/local/bin/docker-compose
 apt install -y nginx certbot python3-certbot-nginx
 
 # Start and enable services
-systemctl start docker
-systemctl enable docker
-systemctl start nginx
-systemctl enable nginx
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo systemctl start nginx
+sudo systemctl enable nginx
 ```
 
 ### 2.4 Create Non-Root User
@@ -183,7 +183,22 @@ EOF
 sed -i 's/127.0.0.1:8000/YOUR_DROPLET_IP:8000/g' nginx/nginx.conf
 ```
 
-### 3.5 Build and Deploy
+### 3.5 Setup Subdomains (Optional but Recommended)
+The nginx configuration now supports subdomains:
+- **Frontend**: `teniolaokunlola.com` (main site)
+- **API**: `api.teniolaokunlola.com` (backend API)
+- **Admin**: `admin.teniolaokunlola.com` (Django admin - accessible at root)
+
+To enable subdomains, add these DNS records to your domain provider:
+```bash
+# Add A records for subdomains pointing to your droplet IP
+# Type: A, Name: api, Value: YOUR_DROPLET_IP, TTL: 300
+# Type: A, Name: admin, Value: YOUR_DROPLET_IP, TTL: 300
+```
+
+**Note**: The current SSL certificate should work for subdomains. If you encounter SSL issues, you may need a wildcard certificate or separate certificates for each subdomain.
+
+### 3.6 Build and Deploy
 ```bash
 # Make deploy script executable
 chmod +x deploy.sh

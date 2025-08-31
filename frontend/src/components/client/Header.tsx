@@ -93,7 +93,7 @@ const Header: React.FC = () => {
         {/* Desktop User Icon */}
         <button
           className="ml-3 sm:ml-6 hidden lg:flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-violet-500 hover:bg-violet-400 transition-colors"
-          onClick={() => window.open('/loading?redirect=/admin/login', '_blank')}
+          onClick={() => window.open('/admin/login', '_blank')}
           aria-label="Admin Login"
         >
           <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
@@ -134,7 +134,7 @@ const Header: React.FC = () => {
             <div className="flex items-center justify-center w-full">
             <button
             className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-purple-500 hover:bg-purple-400 transition-colors"
-            onClick={() => {  setMenuOpen(false); window.open('/loading?redirect=/admin/login', '_blank'); }}
+            onClick={() => {  setMenuOpen(false); window.open('/admin/login', '_blank'); }}
             aria-label="Admin Login"
           >
             <User className="h-7 w-7 sm:h-8 sm:w-8 text-white" />

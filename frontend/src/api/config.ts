@@ -9,13 +9,10 @@ export const buildApiUrl = (endpoint: string): string => {
     return `${API_BASE_URL}/${cleanEndpoint}`;
   }
   
-  // For absolute URLs (like localhost), remove /api suffix if present to avoid duplication
-  const baseUrl = API_BASE_URL.endsWith('/api') || API_BASE_URL.endsWith('/api/')
-    ? API_BASE_URL.replace(/\/api\/?$/, '')
-    : API_BASE_URL.replace(/\/$/, '');
-
+  // For absolute URLs, ensure clean endpoint
+  const baseUrl = API_BASE_URL.replace(/\/$/, '');
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
 
-  return `${baseUrl}/api/${cleanEndpoint}`;
+  return `${baseUrl}/${cleanEndpoint}`;
 };
 

@@ -19,7 +19,7 @@ services:
       - teniola-prod-network
     command: ["gunicorn", "--config", "gunicorn.conf.py", "teniola_site.wsgi_production:application"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -56,7 +56,7 @@ services:
       backend-prod:
         condition: service_healthy
       frontend-build:
-        condition: service_completed_successfully
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s

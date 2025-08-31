@@ -41,6 +41,7 @@ export interface PublicEducation {
 export interface PublicAbout {
   id: number;
   full_name: string;
+  title? : string;
   profile_picture?: string;
   summary: string;
   email?: string;

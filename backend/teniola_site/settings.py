@@ -27,6 +27,8 @@ ALLOWED_HOSTS = [
 ] or [
     "teniolaokunlola.com",
     "www.teniolaokunlola.com",
+    "api.teniolaokunlola.com",
+    "admin.teniolaokunlola.com",
     "127.0.0.1",
     "localhost",
     os.getenv("SERVER_IP", "")
@@ -51,6 +53,11 @@ SECURE_CONTENT_TYPE_NOSNIFF = os.getenv("SECURE_CONTENT_TYPE_NOSNIFF", "True").l
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()
+] or [
+    "https://teniolaokunlola.com",
+    "https://www.teniolaokunlola.com",
+    "https://api.teniolaokunlola.com",
+    "https://admin.teniolaokunlola.com",
 ]
 
 # -----------------------------------------------------------------------------
