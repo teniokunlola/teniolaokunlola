@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, type User } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../api/firebaseConfig';
 import { buildApiUrl } from '../api/config';
@@ -9,6 +9,11 @@ import { getErrorMessage } from '../types/errors';
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Set persistence to local to maintain login state across sessions
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+    logger.error('Failed to set auth persistence', { error });
+});
 
 // Define admin user interface
 interface AdminUser {
@@ -69,7 +74,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+    const lastFetchTime = useRef<number>(0);
+    const [lastActivityTime, setLastActivityTime] = useState<number>(Date.now());
 
     // Check if user is admin and get admin details
     const isAdmin = !!adminUser && adminUser.is_active;
@@ -92,11 +98,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             // Debounce: prevent rapid API calls (wait at least 1 second between calls)
             const now = Date.now();
-            if (now - lastFetchTime < 1000 && retryCount === 0) {
+            if (now - lastFetchTime.current < 1000 && retryCount === 0) {
                 logger.debug('Debouncing API call, waiting...');
                 return;
             }
-            setLastFetchTime(now);
+            lastFetchTime.current = now;
 
             logger.debug('Fetching admin user for Firebase user', { email: firebaseUser.email });
 
@@ -150,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setAdminUser(null);
             setError('Failed to fetch admin user.');
         }
-    }, [lastFetchTime]);
+    }, []);
 
     // Refresh admin user data
     const refreshAdminUser = async () => {
@@ -175,9 +181,81 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(null);
     };
 
+    // Function to check inactivity and logout after 1 hour
+    const checkInactivity = () => {
+        const now = Date.now();
+        const inactivityLimit = 60 * 60 * 1000; // 1 hour in milliseconds
+        if (now - lastActivityTime > inactivityLimit) {
+            logger.debug('User inactive for 1 hour, logging out');
+            logout();
+        }
+    };
+
     useEffect(() => {
-        // This listener will fire whenever the user's sign-in state changes
+        // Set up interval to check inactivity every 5 minutes
+        const interval = setInterval(checkInactivity, 5 * 60 * 1000);
+
+        // Cleanup interval on unmount
+        return () => clearInterval(interval);
+    }, [lastActivityTime]);
+
+    useEffect(() => {
+        // Update last activity time on user interaction
+        const updateActivity = () => setLastActivityTime(Date.now());
+
+        window.addEventListener('mousemove', updateActivity);
+        window.addEventListener('keydown', updateActivity);
+        window.addEventListener('click', updateActivity);
+        window.addEventListener('scroll', updateActivity);
+
+        return () => {
+            window.removeEventListener('mousemove', updateActivity);
+            window.removeEventListener('keydown', updateActivity);
+            window.removeEventListener('click', updateActivity);
+            window.removeEventListener('scroll', updateActivity);
+        };
+    }, []);
+
+    // Rehydrate user data on app initialization
+    useEffect(() => {
+        const rehydrateUser = async () => {
+            try {
+                // Check if there's a current user in Firebase auth
+                const currentUser = auth.currentUser;
+                if (currentUser) {
+                    logger.debug('Rehydrating user data for existing Firebase user', { uid: currentUser.uid });
+                    // Fetch admin user data if not already available
+                    if (!adminUser || adminUser.firebase_uid !== currentUser.uid) {
+                        await fetchAdminUser(currentUser);
+                    }
+                } else {
+                    logger.debug('No existing Firebase user found during rehydration');
+                }
+            } catch (error) {
+                logger.error('Failed to rehydrate user data', { error });
+                // Don't set loading to false here - let the auth state listener handle it
+            }
+        };
+
+        // Only run rehydration if we haven't loaded yet
+        if (loading) {
+            rehydrateUser();
+        }
+    }, [loading, adminUser, fetchAdminUser]);
+
+    // This listener will fire whenever the user's sign-in state changes
+    useEffect(() => {
+        // Add a timeout to prevent indefinite loading
+        const loadingTimeout = setTimeout(() => {
+            if (loading) {
+                logger.warn('Auth state loading timeout - forcing completion');
+                setLoading(false);
+            }
+        }, 10000); // 10 second timeout
+
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            logger.debug('Auth state changed', { hasUser: !!currentUser, uid: currentUser?.uid });
+
             setUser((prevUser) => {
                 if (prevUser?.uid !== currentUser?.uid) {
                     return currentUser;
@@ -189,26 +267,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 // Only fetch admin user data if we don't already have it for this user
                 // or if the current user is different from the one we have data for
                 if (!adminUser || adminUser.firebase_uid !== currentUser.uid) {
+                    logger.debug('Fetching admin user data for authenticated user');
                     try {
-                        fetchAdminUser(currentUser);
+                        await fetchAdminUser(currentUser);
                     } catch (error) {
                         logger.error('Failed to fetch admin user:', { error });
                         setAdminUser(null);
+                        // Don't set loading to false on error - let it retry
+                        return;
                     }
+                } else {
+                    logger.debug('Admin user data already available, skipping fetch');
                 }
             } else {
+                logger.debug('No authenticated user, clearing admin data');
                 setAdminUser(null);
             }
 
+            // Clear the timeout since we got a definitive auth state
+            clearTimeout(loadingTimeout);
             setLoading(false);
         }, (error) => {
+            logger.error('Auth state change error', { error });
             setError(error.message);
+            clearTimeout(loadingTimeout);
             setLoading(false);
         });
 
-        // Cleanup the listener on component unmount
-        return () => unsubscribe();
-    }, [adminUser, fetchAdminUser]);
+        // Cleanup the listener and timeout on component unmount
+        return () => {
+            unsubscribe();
+            clearTimeout(loadingTimeout);
+        };
+    }, [adminUser, fetchAdminUser, loading]);
 
     // The value that will be provided to consumers of the context
     const value: AuthContextType = { 
