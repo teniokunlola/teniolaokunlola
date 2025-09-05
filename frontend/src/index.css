@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import url('https://fonts.googleapis.com/css2?family=Radio+Canada:ital,wght@0,300..700;1,300..700');
 @import url('https://fonts.cdnfonts.com/css/raleway-5');
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -437,4 +440,17 @@ body {
   .admin-print-break {
     page-break-before: always;
   }
+}
+
+/* Project description truncation utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth transition for expandable content */
+.expandable-content {
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }

@@ -5,8 +5,9 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const buildApiUrl = (endpoint: string): string => {
   // If API_BASE_URL is a relative path (starts with /), use it directly
   if (API_BASE_URL.startsWith('/')) {
+    const baseUrl = API_BASE_URL.replace(/\/$/, ''); // Remove trailing slash
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    return `${API_BASE_URL}/${cleanEndpoint}`;
+    return `${baseUrl}/${cleanEndpoint}`;
   }
   
   // For absolute URLs, ensure clean endpoint

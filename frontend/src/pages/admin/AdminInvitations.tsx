@@ -23,11 +23,14 @@ import {
   AlertCircle,
   Copy,
   Send,
-  Calendar
+  Calendar,
+  Eye
 } from 'lucide-react';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { SimpleModal } from '@/components/ui/modal';
 import { logger } from '@/lib/logger';
 import { getErrorMessage } from '@/types/errors';
+import { Button } from '@/components/ui/button';
 
 interface Role {
   id: number;
@@ -60,6 +63,8 @@ const AdminInvitations: React.FC = () => {
   const [showForm, setShowForm] = React.useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [invitationToDelete, setInvitationToDelete] = React.useState<number | null>(null);
+  const [viewModalOpen, setViewModalOpen] = React.useState(false);
+  const [selectedInvitation, setSelectedInvitation] = React.useState<Invitation | null>(null);
 
   const fetchInvitations = React.useCallback(() => {
     setLoading(true);
@@ -137,6 +142,11 @@ const AdminInvitations: React.FC = () => {
       logger.error('Failed to cancel invitation', { error: err, invitationId: id });
       setError(errorMessage);
     }
+  };
+
+  const handleView = (invitation: Invitation) => {
+    setSelectedInvitation(invitation);
+    setViewModalOpen(true);
   };
 
   const copyInviteCode = (code: string) => {
@@ -354,6 +364,14 @@ const AdminInvitations: React.FC = () => {
             </td>
             <td className="py-3 px-4">
               <div className="flex items-center gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => handleView(invitation)}
+                >
+                  <Eye className="w-4 h-4" />
+                  View
+                </Button>
                 {invitation.status === 'pending' && !isExpired(invitation.expires_at) && (
                   <AdminActionButton
                     variant="outline"
@@ -461,6 +479,57 @@ const AdminInvitations: React.FC = () => {
         cancelText="Cancel"
         variant="destructive"
       />
+
+      <SimpleModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        title="Invitation Details"
+      >
+        {selectedInvitation && (
+          <div className="space-y-4">
+            <div>
+              <div className="text-sm text-muted-foreground">Email</div>
+              <div className="text-foreground font-medium">{selectedInvitation.email}</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Role</div>
+                <div className="text-foreground font-medium">{selectedInvitation.role?.name || 'N/A'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Status</div>
+                <div className="text-foreground font-medium capitalize">{selectedInvitation.status}</div>
+              </div>
+            </div>
+            {selectedInvitation.role?.name && (
+              <div>
+                <div className="text-sm text-muted-foreground">Notes</div>
+                <div className="text-foreground">Invitation for {selectedInvitation.role.name} role</div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Invite Code</div>
+                <code className="text-foreground bg-gray-800/40 px-2 py-1 rounded inline-block">{selectedInvitation.invite_code}</code>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Expires At</div>
+                <div className="text-foreground font-medium">{formatDate(selectedInvitation.expires_at)}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Created</div>
+                <div className="text-foreground font-medium">{formatDate(selectedInvitation.created_at)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Accepted At</div>
+                <div className="text-foreground font-medium">{selectedInvitation.accepted_at ? formatDate(selectedInvitation.accepted_at) : '—'}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </SimpleModal>
     </AdminLayout>
   );
 };

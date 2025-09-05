@@ -51,6 +51,18 @@ class EducationSerializer(serializers.ModelSerializer):
         model = Education
         fields = '__all__'
 
+    def create(self, validated_data):
+        certificate = self.context['request'].FILES.get('certificate')
+        if certificate:
+            validated_data['certificate'] = certificate
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        certificate = self.context['request'].FILES.get('certificate')
+        if certificate:
+            validated_data['certificate'] = certificate
+        return super().update(instance, validated_data)
+
 class AboutSerializer(serializers.ModelSerializer):
     # The frontend should upload profile pictures using the 'profile_picture' key and resumes using the 'resume' key in form data.
     class Meta:

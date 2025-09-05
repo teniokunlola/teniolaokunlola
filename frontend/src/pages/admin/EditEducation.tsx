@@ -1,6 +1,8 @@
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminAPI, { type Education } from '@/api/adminAPI';
+
+type EducationForm = Omit<Education, 'certificate'> & { certificate?: string | File };
 import { Input } from '@/components/ui/input';
 import { 
   AdminPageHeader,
@@ -30,11 +32,13 @@ const EditEducation: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [editing, setEditing] = React.useState<Education | null>(null);
-  const [form, setForm] = React.useState<Partial<Education>>({ 
-    degree: '', 
-    institution: '', 
-    start_date: '', 
-    end_date: '' 
+  const [form, setForm] = React.useState<Partial<EducationForm>>({
+    degree: '',
+    institution: '',
+    start_date: '',
+    end_date: '',
+    url: '',
+    certificate: undefined
   });
   const [saving, setSaving] = React.useState(false);
   const [deletingId, setDeletingId] = React.useState<number | null>(null);
@@ -63,11 +67,12 @@ const EditEducation: React.FC = () => {
 
   const handleAdd = () => {
     setEditing(null);
-    setForm({ 
-      degree: '', 
-      institution: '', 
-      start_date: '', 
-      end_date: '' 
+    setForm({
+      degree: '',
+      institution: '',
+      start_date: '',
+      end_date: '',
+      certificate: undefined
     });
     setShowForm(true);
   };
@@ -80,20 +85,38 @@ const EditEducation: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     setError(null);
+
+    if (!form.degree || !form.institution || !form.start_date) {
+      setError('Please fill in all required fields.');
+      setSaving(false);
+      return;
+    }
     
     try {
+      const formData = new FormData();
+      formData.append('degree', form.degree);
+      formData.append('institution', form.institution);
+      formData.append('start_date', form.start_date);
+      if (form.end_date) formData.append('end_date', form.end_date);
+      if (form.url) formData.append('url', form.url);
+      if (form.certificate && (form.certificate as any) instanceof File) {
+        formData.append('certificate', form.certificate);
+      }
+      
       if (editing) {
-        await AdminAPI.education.update(editing.id!, form);
+        await AdminAPI.education.update(editing.id!, formData);
       } else {
-        await AdminAPI.education.create(form);
+        await AdminAPI.education.create(formData);
       }
       fetchEducations();
       setEditing(null);
-      setForm({ 
-        degree: '', 
-        institution: '', 
-        start_date: '', 
-        end_date: '' 
+      setForm({
+        degree: '',
+        institution: '',
+        start_date: '',
+        end_date: '',
+        url: '',
+        certificate: undefined
       });
       setShowForm(false);
     } catch (err) {
@@ -119,11 +142,13 @@ const EditEducation: React.FC = () => {
       setEducations((prev) => prev.filter((edu) => edu.id !== educationToDelete));
       if (editing && editing.id === educationToDelete) {
         setEditing(null);
-        setForm({ 
-          degree: '', 
-          institution: '', 
-          start_date: '', 
-          end_date: '' 
+        setForm({
+          degree: '',
+          institution: '',
+          start_date: '',
+          end_date: '',
+          url: '',
+          certificate: undefined
         });
         setShowForm(false);
       }
@@ -139,11 +164,13 @@ const EditEducation: React.FC = () => {
 
   const handleCancel = () => {
     setEditing(null);
-    setForm({ 
-      degree: '', 
-      institution: '', 
-      start_date: '', 
-      end_date: '' 
+    setForm({
+      degree: '',
+      institution: '',
+      start_date: '',
+      end_date: '',
+      url: '',
+      certificate: undefined
     });
     setShowForm(false);
     setError(null);
@@ -243,6 +270,45 @@ const EditEducation: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
+                <label htmlFor="url" className="text-sm font-medium text-foreground">
+                  URL
+                </label>
+                <Input
+                  id="url"
+                  name="url"
+                  value={form.url || ''}
+                  onChange={handleChange}
+                  className="admin-form-input"
+                  placeholder="https://example.com/course"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="certificate" className="text-sm font-medium text-foreground">
+                  Certificate File
+                </label>
+                <input
+                  type="file"
+                  id="certificate"
+                  name="certificate"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setForm(prev => ({ ...prev, certificate: file }));
+                    }
+                  }}
+                  className="admin-form-input"
+                />
+                {form.certificate && typeof form.certificate === 'string' && (
+                  <p className="text-xs text-muted-foreground">Current: {form.certificate}</p>
+                )}
+              </div>
+            </div>
+            
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <label htmlFor="start_date" className="text-sm font-medium text-foreground">
                   Start Date <span className="text-red-500">*</span>
                 </label>
@@ -300,7 +366,7 @@ const EditEducation: React.FC = () => {
         </AdminFormSection>
       ) : (
         <AdminDataTable
-          headers={['Degree', 'Institution', 'Duration', 'Period', 'Actions']}
+          headers={['Degree', 'Institution', 'URL', 'Certificate', 'Duration', 'Period', 'Actions']}
           loading={loading}
           emptyMessage="No education entries found. Add your first education entry to get started."
         >
@@ -326,6 +392,38 @@ const EditEducation: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Building className="w-4 h-4 text-gray-500" />
                   <span className="font-medium text-foreground">{education.institution}</span>
+                </div>
+              </td>
+              <td className="py-3 px-4">
+                <div className="flex items-center gap-2">
+                  {education.url ? (
+                    <a 
+                      href={education.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:text-blue-400 text-sm truncate max-w-32"
+                    >
+                      {education.url.length > 30 ? `${education.url.substring(0, 30)}...` : education.url}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
+                </div>
+              </td>
+              <td className="py-3 px-4">
+                <div className="flex items-center gap-2">
+                  {education.certificate ? (
+                    <a 
+                      href={education.certificate} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-green-500 hover:text-green-400 text-sm truncate max-w-32"
+                    >
+                      View Certificate
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
                 </div>
               </td>
               <td className="py-3 px-4">

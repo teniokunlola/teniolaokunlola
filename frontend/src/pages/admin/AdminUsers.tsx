@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
+import { SimpleModal } from '@/components/ui/modal';
 import { logger } from '@/lib/logger';
 import { getErrorMessage } from '@/types/errors';
 
@@ -33,6 +34,8 @@ const AdminUsers: React.FC = () => {
   const [deletingId, setDeletingId] = React.useState<number | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [userToDelete, setUserToDelete] = React.useState<number | null>(null);
+  const [viewModalOpen, setViewModalOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<AdminUser | null>(null);
 
   const fetchUsers = React.useCallback(() => {
     setLoading(true);
@@ -67,6 +70,11 @@ const AdminUsers: React.FC = () => {
       setDeletingId(null);
       setUserToDelete(null);
     }
+  };
+
+  const handleView = (user: AdminUser) => {
+    setSelectedUser(user);
+    setViewModalOpen(true);
   };
 
   const formatDate = (dateString: string | null) => {
@@ -282,7 +290,7 @@ const AdminUsers: React.FC = () => {
                     variant="outline"
                     size="sm"
                     icon={Eye}
-                    onClick={() => window.open(`/admin/users/${user.id}`, '_blank')}
+                    onClick={() => handleView(user)}
                   >
                     View
                   </AdminActionButton>
@@ -315,6 +323,69 @@ const AdminUsers: React.FC = () => {
         cancelText="Cancel"
         variant="destructive"
       />
+
+      <SimpleModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        title="Admin User Details"
+      >
+        {selectedUser && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Display Name</div>
+                <div className="text-foreground font-medium">{selectedUser.display_name || '—'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Email</div>
+                <div className="text-foreground font-medium">{selectedUser.email}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Role</div>
+                <div className="text-foreground font-medium">{selectedUser.role?.name || '—'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Status</div>
+                <div className="text-foreground font-medium">{selectedUser.is_active ? 'Active' : 'Inactive'}</div>
+              </div>
+            </div>
+            {selectedUser.role?.description && (
+              <div>
+                <div className="text-sm text-muted-foreground">Role Description</div>
+                <div className="text-foreground">{selectedUser.role.description}</div>
+              </div>
+            )}
+            {selectedUser.role?.permissions?.permissions?.length ? (
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Permissions</div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedUser.role.permissions.permissions.map((perm) => (
+                    <span key={perm} className="px-2 py-1 rounded bg-muted text-muted-foreground text-xs">
+                      {perm}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-muted-foreground">Joined</div>
+                <div className="text-foreground font-medium">{formatDate(selectedUser.created_at)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Last Login</div>
+                <div className="text-foreground font-medium">{formatDate(selectedUser.last_login)}</div>
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">User ID</div>
+              <code className="text-foreground bg-gray-800/40 px-2 py-1 rounded inline-block">{selectedUser.id}</code>
+            </div>
+          </div>
+        )}
+      </SimpleModal>
     </AdminLayout>
   );
 };

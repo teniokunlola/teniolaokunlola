@@ -98,6 +98,7 @@ class ProjectList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    pagination_class = None  # Disable pagination for public API
 
 # --- Portfolio Views ---
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
@@ -105,30 +106,35 @@ class SkillList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
+    pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ExperienceList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Experience.objects.all()
     serializer_class = ExperienceSerializer
+    pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class EducationList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Education.objects.all()
     serializer_class = EducationSerializer
+    pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class AboutList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = About.objects.all()
     serializer_class = AboutSerializer
+    pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class SocialLinkList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = SocialLink.objects.all()
     serializer_class = SocialLinkSerializer
+    pagination_class = None  # Disable pagination for public API
 
 
 # --- Communication Views ---
@@ -158,6 +164,7 @@ class TestimonialList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Testimonial.objects.all()
     serializer_class = TestimonialSerializer
+    pagination_class = None  # Disable pagination for public API
 
 
 # --- Configuration Views ---
@@ -166,12 +173,14 @@ class SettingList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Setting.objects.all()
     serializer_class = SettingSerializer
+    pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class ServiceList(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
+    pagination_class = None  # Disable pagination for public API
 
 # --- Admin Management Views ---
 class AdminRoleViewSet(viewsets.ReadOnlyModelViewSet):

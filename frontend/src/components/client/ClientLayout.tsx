@@ -27,7 +27,7 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-background text-foreground" data-theme={theme}>
       <Header />
-      <main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {children}
       </main>
       <Footer />

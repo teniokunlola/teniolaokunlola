@@ -21,6 +21,7 @@ import EditExperience from './pages/admin/EditExperience';
 import EditEducation from './pages/admin/EditEducation';
 import EditSkills from './pages/admin/EditSkills';
 import AdminUsers from './pages/admin/AdminUsers';
+import EditAbout from './pages/admin/EditAbout';
 
 
 import About from './pages/client/About';
@@ -28,6 +29,8 @@ import Contact from './pages/client/Contact';
 import Home from './pages/client/Home';
 import Projects from './pages/client/Projects';
 import Testimonials from './pages/client/Testimonials';
+import Education from './pages/client/Education';
+import Experience from './pages/client/Experience';
 
 
 const App: React.FC = () => (
@@ -45,6 +48,10 @@ const App: React.FC = () => (
           <Route path="/" element={<Home />} />
           {/* Projects Route */}
           <Route path="/projects" element={<Projects />} />
+          {/* Education Route */}
+          <Route path="/education" element={<Education />} />
+          {/* Experience Route */}
+          <Route path="/experience" element={<Experience />} />
           {/* Testimonials Route */}
           <Route path="/testimonials" element={<Testimonials />} />
 
@@ -103,6 +110,15 @@ const App: React.FC = () => (
             element={
               <ProtectedRoute requireAdmin={true}>
                 <EditProjects />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/about"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <EditAbout />
               </ProtectedRoute>
             }
           />

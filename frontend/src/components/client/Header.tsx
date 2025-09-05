@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Menu, X } from 'lucide-react';
-import { useSettingsStore } from '@/store';
+import { useSettingsStore, useUIStore, useThemeSync } from '@/store';
 import '@/index.css'
 
 const navigation = [
   { name: 'Home', id: 'home' },
   // { name: 'About', id: 'about' },
-  { name: 'Projects', id: 'projects' },
   { name: 'Services', id: 'services' },
+  { name: 'Experience', id: 'experience' },
+  { name: 'Education', id: 'education' },
+  { name: 'Projects', id: 'projects' },
   { name: 'Testimonials', id: 'testimonials' },
-  { name: 'Contact', id: 'contact' },
+  { name: 'Contact', id: 'contact' }
 ];
 
 const Header: React.FC = () => {
   const location = useLocation();
 
+  useThemeSync();
+  const theme = useUIStore(state => state.theme);
   const { settings, fetchSettings } = useSettingsStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -60,12 +64,12 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="w-full pt-3 sm:pt-4 pb-1 sm:pb-2 fixed top-0 left-0 right-0 z-50">
-      <div className=" flex items-center justify-between px-3 sm:px-6 rounded-full m-4 mb-0 border-2 border-purple-800 p-2 bg-black  sm:m-6 sm:p-3 max-sm:p-4">
+    <header className="w-full pt-3 sm:pt-4 pb-1 sm:pb-2 fixed top-0 left-0 right-0 z-50" data-theme={theme}>
+      <div className=" flex items-center justify-between px-3 sm:px-6 rounded-full m-4 mb-0 border-2 border-purple-800 p-2 bg-background  sm:m-6 sm:p-3 max-sm:p-4">
         {/* Logo */}
         <Link to="/" className="flex items-center select-none z-20">
           <span
-            className="sm:text-3xl md:text-3xl max-sm:text-3xl font-bold tracking-tight font-radio-canada uppercase text-white"
+            className="sm:text-3xl md:text-3xl max-sm:text-3xl font-bold tracking-tight font-radio-canada uppercase text-foreground"
           > Teniola
             {/* {settings.siteName || 'Teniola'} */}
           </span>
@@ -81,7 +85,7 @@ const Header: React.FC = () => {
                 key={item.name}
                 onClick={() => scrollToSection(item.id)}
                 className={
-                  'mx-2 sm:mx-4 text-white font-raleway font-bold uppercase tracking-wide transition-colors text-center hover:text-purple-500 hover:scale-110'+
+                  'mx-2 sm:mx-4 text-foreground font-raleway font-bold uppercase tracking-wide transition-colors text-center hover:text-purple-500 hover:scale-110'+
                   (isActive(item.id) ? ' text-purple-500' : '')
                 }
               >
@@ -92,7 +96,7 @@ const Header: React.FC = () => {
         </nav>
         {/* Desktop User Icon */}
         <button
-          className="ml-3 sm:ml-6 hidden lg:flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-violet-500 hover:bg-violet-400 transition-colors"
+          className="ml-3 sm:ml-6 hidden lg:flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-600 hover:bg-purple-500 transition-colors"
           onClick={() => window.open('/admin/login', '_blank')}
           aria-label="Admin Login"
         >
@@ -100,7 +104,7 @@ const Header: React.FC = () => {
         </button>
         {/* Hamburger for mobile/tablet */}
         <button
-          className="ml-2 sm:ml-4 flex lg:hidden items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-violet-500 bg-black text-violet-400 "
+          className="ml-2 sm:ml-4 flex lg:hidden items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-purple-600 bg-background text-purple-400 "
           onClick={() => setMenuOpen((v) => !v)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
         >
@@ -133,7 +137,7 @@ const Header: React.FC = () => {
             ))}
             <div className="flex items-center justify-center w-full">
             <button
-            className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-purple-500 hover:bg-purple-400 transition-colors"
+            className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-purple-600 hover:bg-purple-500 transition-colors"
             onClick={() => {  setMenuOpen(false); window.open('/admin/login', '_blank'); }}
             aria-label="Admin Login"
           >

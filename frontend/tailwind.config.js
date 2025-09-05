@@ -6,6 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'raleway': ['Raleway', 'sans-serif'],
+        'radio-canada': ['Radio Canada', 'sans-serif'],
+      },
       colors: {
         primary: {
           DEFAULT: '#7c3aed', // violet-600

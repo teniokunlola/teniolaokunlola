@@ -3,6 +3,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { type AdminUser } from '@/api/adminAPI';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { 
   AdminPageHeader,
   AdminFormSection,
@@ -23,9 +24,11 @@ import {
   Key,
   Activity,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { SimpleModal } from '@/components/ui/modal';
+import { auth } from '@/api/firebaseConfig';
 import { authFetch } from '@/api/authFetch';
 import { buildApiUrl } from '@/api/config';
 import { logger } from '@/lib/logger';
@@ -42,6 +45,10 @@ const AdminProfile: React.FC = () => {
     email: ''
   });
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
   const fetchProfile = React.useCallback(async () => {
     setLoading(true);
@@ -70,6 +77,57 @@ const AdminProfile: React.FC = () => {
 
   const handleEdit = () => {
     setEditing(true);
+  };
+
+  const handlePasswordChange = async () => {
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    if (!auth.currentUser) {
+      setPasswordError('You must be logged in.');
+      return;
+    }
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters.');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+
+    try {
+      setPasswordBusy(true);
+      // For Firebase password change, user needs recent login. If email/password user, reauthenticate with current password.
+      const user = auth.currentUser;
+      // We will attempt updatePassword directly; if it fails with requires-recent-login, we show a reset flow.
+      // Import updatePassword on-demand to keep bundle smaller
+      const { updatePassword } = await import('firebase/auth');
+      await updatePassword(user!, passwordForm.newPassword);
+      setPasswordSuccess('Password updated successfully.');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      const code = err?.code || '';
+      if (code === 'auth/requires-recent-login') {
+        setPasswordError('Recent login required. Please log out and log back in, or use password reset below.');
+      } else {
+        setPasswordError(getErrorMessage(err));
+      }
+    } finally {
+      setPasswordBusy(false);
+    }
+  };
+
+  const handleSendPasswordReset = async () => {
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    try {
+      if (!profile?.email) throw new Error('No email found for this account.');
+      const { sendPasswordResetEmail } = await import('firebase/auth');
+      await sendPasswordResetEmail(auth, profile.email);
+      setPasswordSuccess('Password reset email sent. Check your inbox.');
+    } catch (err) {
+      setPasswordError(getErrorMessage(err));
+    }
   };
 
   const handleCancel = () => {
@@ -420,18 +478,50 @@ const AdminProfile: React.FC = () => {
         title="Change Password"
       >
         <div className="space-y-4">
-          <p className="text-muted-foreground">
-            Password change functionality would be implemented here. This would typically include:
-          </p>
-          <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-            <li>Current password verification</li>
-            <li>New password input with strength validation</li>
-            <li>Password confirmation</li>
-            <li>Security requirements display</li>
-          </ul>
-          <p className="text-sm text-muted-foreground">
-            For now, this is a placeholder for the password change feature.
-          </p>
+          {passwordError && (
+            <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500 text-sm">{passwordError}</div>
+          )}
+          {passwordSuccess && (
+            <div className="p-3 rounded bg-green-500/10 border border-green-500/20 text-green-500 text-sm">{passwordSuccess}</div>
+          )}
+          <div className="space-y-2">
+            <label className="text-sm text-foreground">New Password</label>
+            <Input
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+              placeholder="Enter new password"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm text-foreground">Confirm New Password</label>
+            <Input
+              type="password"
+              value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              placeholder="Confirm new password"
+            />
+          </div>
+          {/* Simple strength hint */}
+          <p className="text-xs text-muted-foreground">Use at least 6 characters. Include letters and numbers for a stronger password.</p>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={handleSendPasswordReset}>
+              Send Reset Email
+            </Button>
+            <Button variant="default" onClick={handlePasswordChange} disabled={passwordBusy}>
+              {passwordBusy ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Update Password
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </SimpleModal>
     </AdminLayout>

@@ -136,7 +136,7 @@ const Messages: React.FC = () => {
         <AdminActionButton
           variant="primary"
           icon={MessageSquare}
-          onClick={() => window.location.reload()}
+          onClick={() => fetchMessages()}
         >
           Refresh Messages
         </AdminActionButton>

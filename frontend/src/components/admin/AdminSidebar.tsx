@@ -69,6 +69,12 @@ const AdminSidebar: React.FC<SidebarProps> = ({ className, collapsed, setCollaps
           permission: 'manage_projects',
         },
         {
+          name: 'About',
+          href: '/admin/about',
+          icon: User,
+          permission: 'manage_about',
+        },
+        {
           name: 'Experience',
           href: '/admin/experience',
           icon: Briefcase,
@@ -282,7 +288,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({ className, collapsed, setCollaps
 
       {/* Navigation */}
       <nav className={cn(
-        "flex-1 p-2 space-y-1 admin-scrollbar bg-background/30 overflow-y-auto",
+        "flex-1 p-2 space-y-1 admin-scrollbar bg-background/30 overflow-y-auto overscroll-contain",
         collapsed && "p-1 space-y-2"
       )}>
         {navigation.map(item => renderNavItem(item))}

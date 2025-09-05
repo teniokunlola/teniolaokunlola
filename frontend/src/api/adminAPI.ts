@@ -55,11 +55,16 @@ export interface Education {
   start_date: string;
   end_date?: string;
   created_at?: string;
+  url?: string;
+  certificate?: string;
 }
 
 export interface About {
   id?: number;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
+  title?: string;
   profile_picture?: string;
   summary: string;
   email?: string;
@@ -162,7 +167,10 @@ export class AdminAPI {
     if (!response.ok) {
       throw new Error(`Failed to fetch ${endpoint}`);
     }
-    return response.json();
+    const data = await response.json();
+    // Django returns paginated data with {count, next, previous, results}
+    // Extract the results array for list operations
+    return data.results || data;
   }
 
   static async get<T>(endpoint: string, id: number): Promise<T> {
@@ -227,13 +235,47 @@ export class AdminAPI {
     }
   }
 
+  static async createWithFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const response = await authFetch(buildApiUrl(withSlash(endpoint)), {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Failed to create ${endpoint}`);
+    }
+    return response.json();
+  }
+
+  static async updateWithFormData<T>(endpoint: string, id: number, formData: FormData): Promise<T> {
+    const response = await authFetch(buildApiUrl(withSlash(`${endpoint}/${id}`)), {
+      method: 'PUT',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Failed to update ${endpoint}`);
+    }
+    return response.json();
+  }
+
   // Specific API endpoints
   static projects = {
     // CRUD methods
     list: () => this.list<Project>('admin/projects'),
     get: (id: number) => this.get<Project>('admin/projects', id),
-    create: (data: Partial<Project>) => this.create<Project>('admin/projects', data),
-    update: (id: number, data: Partial<Project>) => this.update<Project>('admin/projects', id, data),
+    create: (data: FormData | Partial<Project>) => {
+      if (data instanceof FormData) {
+        return this.createWithFormData<Project>('admin/projects', data);
+      }
+      return this.create<Project>('admin/projects', data);
+    },
+    update: (id: number, data: FormData | Partial<Project>) => {
+      if (data instanceof FormData) {
+        return this.updateWithFormData<Project>('admin/projects', id, data);
+      }
+      return this.update<Project>('admin/projects', id, data);
+    },
     patch: (id: number, data: Partial<Project>) => this.patch<Project>('admin/projects', id, data),
     // Delete methods
     delete: (id: number) => this.delete('admin/projects', id),
@@ -262,8 +304,18 @@ export class AdminAPI {
   static education = {
     list: () => this.list<Education>('admin/educations'),
     get: (id: number) => this.get<Education>('admin/educations', id),
-    create: (data: Partial<Education>) => this.create<Education>('admin/educations', data),
-    update: (id: number, data: Partial<Education>) => this.update<Education>('admin/educations', id, data),
+    create: (data: FormData | Partial<Education>) => {
+      if (data instanceof FormData) {
+        return this.createWithFormData<Education>('admin/educations', data);
+      }
+      return this.create<Education>('admin/educations', data);
+    },
+    update: (id: number, data: FormData | Partial<Education>) => {
+      if (data instanceof FormData) {
+        return this.updateWithFormData<Education>('admin/educations', id, data);
+      }
+      return this.update<Education>('admin/educations', id, data);
+    },
     patch: (id: number, data: Partial<Education>) => this.patch<Education>('admin/educations', id, data),
     delete: (id: number) => this.delete('admin/educations', id),
   };
@@ -271,8 +323,18 @@ export class AdminAPI {
   static about = {
     list: () => this.list<About>('admin/about'),
     get: (id: number) => this.get<About>('admin/about', id),
-    create: (data: Partial<About>) => this.create<About>('admin/about', data),
-    update: (id: number, data: Partial<About>) => this.update<About>('admin/about', id, data),
+    create: (data: FormData | Partial<About>) => {
+      if (data instanceof FormData) {
+        return this.createWithFormData<About>('admin/about', data);
+      }
+      return this.create<About>('admin/about', data);
+    },
+    update: (id: number, data: FormData | Partial<About>) => {
+      if (data instanceof FormData) {
+        return this.updateWithFormData<About>('admin/about', id, data);
+      }
+      return this.update<About>('admin/about', id, data);
+    },
     patch: (id: number, data: Partial<About>) => this.patch<About>('admin/about', id, data),
     delete: (id: number) => this.delete('admin/about', id),
   };
@@ -286,8 +348,18 @@ export class AdminAPI {
   static testimonials = {
     list: () => this.list<Testimonial>('admin/testimonials'),
     get: (id: number) => this.get<Testimonial>('admin/testimonials', id),
-    create: (data: Partial<Testimonial>) => this.create<Testimonial>('admin/testimonials', data),
-    update: (id: number, data: Partial<Testimonial>) => this.update<Testimonial>('admin/testimonials', id, data),
+    create: (data: FormData | Partial<Testimonial>) => {
+      if (data instanceof FormData) {
+        return this.createWithFormData<Testimonial>('admin/testimonials', data);
+      }
+      return this.create<Testimonial>('admin/testimonials', data);
+    },
+    update: (id: number, data: FormData | Partial<Testimonial>) => {
+      if (data instanceof FormData) {
+        return this.updateWithFormData<Testimonial>('admin/testimonials', id, data);
+      }
+      return this.update<Testimonial>('admin/testimonials', id, data);
+    },
     patch: (id: number, data: Partial<Testimonial>) => this.patch<Testimonial>('admin/testimonials', id, data),
     delete: (id: number) => this.delete('admin/testimonials', id),
   };

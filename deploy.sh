@@ -1,63 +1,103 @@
 #!/bin/bash
 
-# Production Deployment Script for DigitalOcean
+# Production deployment script for Teniola Site
+# This script builds and deploys the application using Docker
+
 set -e
 
-echo "🚀 Starting production deployment..."
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-# Check if we're in the right directory
-if [ ! -f "docker-compose.prod.yml" ]; then
-    echo "❌ Error: docker-compose.prod.yml not found. Run this script from the project root."
+echo -e "${BLUE}🚀 Starting Teniola Site Production Deployment${NC}"
+
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    echo -e "${RED}❌ Docker is not installed. Please install Docker first.${NC}"
     exit 1
 fi
 
-# Load production environment variables
+if ! command -v docker-compose &> /dev/null; then
+    echo -e "${RED}❌ Docker Compose is not installed. Please install Docker Compose first.${NC}"
+    exit 1
+fi
+
+# Check if .env.production exists
 if [ ! -f "backend/.env.production" ]; then
-    echo "❌ Error: backend/.env.production not found. Please create it with your production values."
+    echo -e "${RED}❌ backend/.env.production file not found. Please create it with production environment variables.${NC}"
     exit 1
 fi
 
-echo "📋 Environment file found"
+# Check if Firebase service account key exists
+if [ ! -f "backend/core/firebase_service_account.json" ]; then
+    echo -e "${RED}❌ Firebase service account key not found at backend/core/firebase_service_account.json${NC}"
+    exit 1
+fi
 
-# Stop any running containers
-echo "🛑 Stopping existing containers..."
-docker-compose -f docker-compose.prod.yml down --remove-orphans
+# Load environment variables
+echo -e "${YELLOW}Loading production environment variables...${NC}"
+export $(cat backend/.env.production | grep -v '^#' | xargs)
 
-# Remove old images
-echo "🧹 Cleaning up old images..."
-docker system prune -f
+# Build frontend
+echo -e "${YELLOW}Building frontend...${NC}"
+cd frontend
+npm ci --only=production
+npm run build
+cd ..
 
-# Build and start production containers
-echo "🔨 Building production containers..."
-docker-compose -f docker-compose.prod.yml build --no-cache
+# Stop existing containers
+echo -e "${YELLOW}Stopping existing containers...${NC}"
+docker-compose -f docker-compose.prod.yml down --remove-orphans || true
 
-echo "🚀 Starting production services..."
-docker-compose -f docker-compose.prod.yml up -d
+# Build and start containers
+echo -e "${YELLOW}Building and starting production containers...${NC}"
+docker-compose -f docker-compose.prod.yml up --build -d
 
 # Wait for services to be ready
-echo "⏳ Waiting for services to be ready..."
-sleep 45
+echo -e "${YELLOW}Waiting for services to be ready...${NC}"
+sleep 30
+
+# Run database migrations
+echo -e "${YELLOW}Running database migrations...${NC}"
+docker-compose -f docker-compose.prod.yml exec backend-prod python manage.py migrate
+
+# Collect static files
+echo -e "${YELLOW}Collecting static files...${NC}"
+docker-compose -f docker-compose.prod.yml exec backend-prod python manage.py collectstatic --noinput
 
 # Check service health
-echo "🏥 Checking service health..."
-if curl -f http://localhost/health > /dev/null 2>&1; then
-    echo "✅ Frontend is healthy"
-else
-    echo "❌ Frontend health check failed"
-fi
-
+echo -e "${YELLOW}Checking service health...${NC}"
 if curl -f http://localhost/api/health/ > /dev/null 2>&1; then
-    echo "✅ Backend API is healthy"
+    echo -e "${GREEN}✅ Backend health check passed${NC}"
 else
-    echo "❌ Backend API health check failed"
+    echo -e "${RED}❌ Backend health check failed${NC}"
+    docker-compose -f docker-compose.prod.yml logs backend-prod
+    exit 1
 fi
 
-echo "🎉 Deployment completed successfully!"
-echo "🌐 Frontend: http://localhost"
-echo "🔧 Backend API: http://localhost/api/"
-echo "📊 Container status:"
+if curl -f http://localhost/ > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Frontend health check passed${NC}"
+else
+    echo -e "${RED}❌ Frontend health check failed${NC}"
+    docker-compose -f docker-compose.prod.yml logs nginx
+    exit 1
+fi
+
+# Show running containers
+echo -e "${YELLOW}Running containers:${NC}"
 docker-compose -f docker-compose.prod.yml ps
 
-echo ""
-echo "🔍 To view logs: docker-compose -f docker-compose.prod.yml logs -f [service-name]"
-echo "🔄 To restart: docker-compose -f docker-compose.prod.yml restart"
+echo -e "\n${GREEN}🎉 Deployment completed successfully!${NC}"
+echo -e "${BLUE}Application is now running at:${NC}"
+echo -e "  Frontend: https://teniolaokunlola.com"
+echo -e "  API: https://api.teniolaokunlola.com"
+echo -e "  Admin: https://admin.teniolaokunlola.com"
+
+echo -e "\n${YELLOW}To view logs:${NC}"
+echo -e "  docker-compose -f docker-compose.prod.yml logs -f"
+
+echo -e "\n${YELLOW}To stop the application:${NC}"
+echo -e "  docker-compose -f docker-compose.prod.yml down"

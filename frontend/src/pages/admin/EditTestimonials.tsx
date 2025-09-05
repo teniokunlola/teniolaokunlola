@@ -164,31 +164,41 @@ const EditTestimonials: React.FC = () => {
     }
     
     try {
-      const testimonialData: Partial<Testimonial> = {
-        name: nameValidation.value,
-        feedback: feedbackValidation.value,
-        company: companyValidation.value || '',
-        position: positionValidation.value || '',
-        rating: ratingValidation.value,
-      };
-      
       if (imageFile) {
-        // For now, we'll handle image upload separately
-        // In a real implementation, you'd upload the image first and get a URL
-        testimonialData.image = imageFile.name; // This is a placeholder
-      } else if (editing && typeof form.image === 'string' && form.image) {
-        // If editing and no new file, keep the existing image
-        testimonialData.image = form.image;
+        // Use FormData for file uploads
+        const formData = new FormData();
+        formData.append('name', nameValidation.value);
+        formData.append('feedback', feedbackValidation.value);
+        formData.append('company', companyValidation.value || '');
+        formData.append('position', positionValidation.value || '');
+        formData.append('rating', ratingValidation.value.toString());
+        formData.append('image', imageFile);
+        
+        if (editing) {
+          await AdminAPI.testimonials.update(editing.id!, formData);
+        } else {
+          await AdminAPI.testimonials.create(formData);
+        }
       } else {
-        setError('Testimonial image is required.');
-        setSaving(false);
-        return;
-      }
-      
-      if (editing) {
-        await AdminAPI.testimonials.update(editing.id!, testimonialData);
-      } else {
-        await AdminAPI.testimonials.create(testimonialData);
+        // No image file, create/update with JSON data only
+        const testimonialData: Partial<Testimonial> = {
+          name: nameValidation.value,
+          feedback: feedbackValidation.value,
+          company: companyValidation.value || '',
+          position: positionValidation.value || '',
+          rating: ratingValidation.value,
+        };
+        
+        if (editing && typeof form.image === 'string' && form.image) {
+          // If editing and no new file, keep the existing image
+          testimonialData.image = form.image;
+        }
+        
+        if (editing) {
+          await AdminAPI.testimonials.update(editing.id!, testimonialData);
+        } else {
+          await AdminAPI.testimonials.create(testimonialData);
+        }
       }
       
       // Reset rate limiter on successful save
@@ -392,7 +402,7 @@ const EditTestimonials: React.FC = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  Client Image <span className="text-red-500">*</span>
+                  Client Image
                 </label>
                 <ImageUpload
                   value={form.image}

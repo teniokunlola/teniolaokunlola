@@ -172,20 +172,10 @@ const EditProjects: React.FC = () => {
         setSaving(false);
         return;
       }
-      let response;
       if (editing) {
-        response = await authFetch(buildApiUrl(`admin/projects/${editing.id}/`), {
-          method: 'PUT',
-          body: formData,
-        });
+        await AdminAPI.projects.update(editing.id!, formData);
       } else {
-        response = await authFetch(buildApiUrl('admin/projects/'), {
-          method: 'POST',
-          body: formData,
-        });
-      }
-      if (!response.ok) {
-        throw new Error('Failed to save project');
+        await AdminAPI.projects.create(formData);
       }
       
       // Reset rate limiter on successful save
@@ -384,7 +374,7 @@ const EditProjects: React.FC = () => {
           loading={loading}
           emptyMessage="No projects found. Add your first project to get started."
         >
-            {projects.map((project) => (
+            {projects && Array.isArray(projects) && projects.map((project) => (
             <tr key={project.id} className="hover:bg-gray-800/20 transition-colors">
               <td className="py-3 px-4">
                 <div className="flex items-center gap-3">

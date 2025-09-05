@@ -1,73 +1,86 @@
+version: '3.8'
 
 services:
-  backend-prod:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: teniola-backend-prod
-    restart: unless-stopped
-    env_file:
-      - ./backend/.env.production
-    environment:
-      - DJANGO_SETTINGS_MODULE=teniola_site.settings_production
-    volumes:
-      - ./backend/media:/app/media
-      - ./backend/core:/app/core
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    networks:
-      - teniola-prod-network
-    command: ["gunicorn", "--config", "gunicorn.conf.py", "teniola_site.wsgi_production:application"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  frontend-build:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: teniola-frontend-build
-    # Runs once to build frontend -> outputs to shared volume
-    command: [ "sh", "-c", "npm run build" ]
-    volumes:
-      - frontend_build:/app/dist
-    networks:
-      - teniola-prod-network
-
+  # Nginx reverse proxy
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: teniola-nginx
-    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/letsencrypt/live/teniolaokunlola.com:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-      - frontend_build:/app/dist:ro
-    networks:
-      - teniola-prod-network
+      - ./frontend/dist:/app/dist:ro
+      - ./backend/staticfiles:/app/staticfiles:ro
+      - ./backend/media:/app/media:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-      backend-prod:
-        condition: service_healthy
-      frontend-build:
-        condition: service_started
+      - backend-prod
+    restart: unless-stopped
+    networks:
+      - teniola-network
+
+  # Django backend
+  backend-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: teniola-backend
+    environment:
+      - DJANGO_ENV=production
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=False
+      - ALLOWED_HOSTS=teniolaokunlola.com,www.teniolaokunlola.com,api.teniolaokunlola.com,admin.teniolaokunlola.com,localhost,127.0.0.1
+      - SUPABASE_DB_HOST=${SUPABASE_DB_HOST}
+      - SUPABASE_DB_NAME=${SUPABASE_DB_NAME}
+      - SUPABASE_DB_USER=${SUPABASE_DB_USER}
+      - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - SUPABASE_DB_PORT=${SUPABASE_DB_PORT}
+      - CORS_ALLOWED_ORIGINS=https://teniolaokunlola.com,https://www.teniolaokunlola.com,https://admin.teniolaokunlola.com
+      - CSRF_TRUSTED_ORIGINS=https://teniolaokunlola.com,https://www.teniolaokunlola.com,https://admin.teniolaokunlola.com
+      - SECURE_SSL_REDIRECT=True
+      - SECURE_HSTS_SECONDS=31536000
+      - SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+      - SECURE_HSTS_PRELOAD=True
+      - CSRF_COOKIE_SECURE=True
+      - SESSION_COOKIE_SECURE=True
+      - SECURE_BROWSER_XSS_FILTER=True
+      - SECURE_CONTENT_TYPE_NOSNIFF=True
+    volumes:
+      - ./backend/media:/app/media
+      - ./backend/staticfiles:/app/staticfiles
+      - ./backend/core/firebase_service_account.json:/app/core/firebase_service_account.json:ro
+    expose:
+      - "8000"
+    restart: unless-stopped
+    networks:
+      - teniola-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
-volumes:
-  static_volume:
-  media_volume:
-  frontend_build:
+  # PostgreSQL database (optional - can use external Supabase)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: teniola-postgres
+  #   environment:
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - teniola-network
 
 networks:
-  teniola-prod-network:
+  teniola-network:
     driver: bridge
+
+# volumes:
+#   postgres_data:

@@ -7,7 +7,7 @@ import ClientLayout from '@/components/client/ClientLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Mail, Download, Sun, Moon, Sparkles, Star, ArrowRight, Phone, MapPin } from 'lucide-react';
+import { Mail, Download, Sun, Moon, Sparkles, Star, ArrowRight, Phone, MapPin, ChevronDown, ChevronUp, GraduationCap, Briefcase } from 'lucide-react';
 import { useScroll, useTransform } from 'framer-motion';
 import PublicAPI, {
   type PublicAbout,
@@ -16,7 +16,7 @@ import PublicAPI, {
   type PublicTestimonial,
   type PublicService,
   type PublicExperience,
-
+  type PublicEducation,
   type ContactFormData
 } from '@/api/publicAPI';
 import { 
@@ -39,6 +39,7 @@ const Home: React.FC = () => {
   const [testimonials, setTestimonials] = React.useState<PublicTestimonial[]>([]);
   const [services, setServices] = React.useState<PublicService[]>([]);
   const [experience, setExperience] = React.useState<PublicExperience[]>([]);
+  const [education, setEducation] = React.useState<PublicEducation[]>([]);
 
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -46,6 +47,8 @@ const Home: React.FC = () => {
   const [contactLoading, setContactLoading] = React.useState(false);
   const [contactSuccess, setContactSuccess] = React.useState<string | null>(null);
   const [contactError, setContactError] = React.useState<string | null>(null);
+  const [expandedProjects, setExpandedProjects] = React.useState<Set<number>>(new Set());
+  const [expandedTestimonials, setExpandedTestimonials] = React.useState<Set<number>>(new Set());
   
   // Rate limiting for contact form
   const rateLimiter = React.useMemo(() => new RateLimiter(3, 60000), []); // 3 attempts per minute
@@ -59,6 +62,32 @@ const Home: React.FC = () => {
   // Theme toggle function
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
+  };
+
+  // Toggle project expansion
+  const toggleProjectExpansion = (projectId: number) => {
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle testimonial expansion
+  const toggleTestimonialExpansion = (testimonialId: number) => {
+    setExpandedTestimonials(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(testimonialId)) {
+        newSet.delete(testimonialId);
+      } else {
+        newSet.add(testimonialId);
+      }
+      return newSet;
+    });
   };
 
   // Apply theme to document
@@ -85,14 +114,16 @@ const Home: React.FC = () => {
       PublicAPI.socialLinks.list(),
       PublicAPI.settings.list(),
     ])
-      .then(([
+      .then(([ 
         aboutData,
         projectsData,
         skillsData,
         testimonialsData,
         servicesData,
         experienceData,
-
+        educationData,
+        _socialLinksData,
+        _settingsData,
       ]) => {
         if (mounted) {
           setAbout(aboutData[0] || null);
@@ -101,7 +132,8 @@ const Home: React.FC = () => {
           setTestimonials(testimonialsData);
           setServices(servicesData);
           setExperience(experienceData);
-
+          setEducation(educationData);
+          // Note: socialLinks and settings are not used in the current UI
         }
       })
       .catch((err) => {
@@ -280,13 +312,13 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <motion.h1 
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 sm:mb-6 leading-tight"
+                className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 sm:mb-6 leading-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                I'm <span className="text-purple-600 dark:text-purple-500 bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-500 dark:to-purple-300 bg-clip-text font-raleway">{about?.full_name || "Teniola"}</span>,<br />
-                <span className="text-foreground">Full-Stack Developer</span>
+                I am <span className="text-purple-600 dark:text-purple-500 bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-500 dark:to-purple-300 bg-clip-text font-raleway">{about?.first_name || "Teniola"}</span> <span className="text-purple-600 dark:text-purple-500 bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-500 dark:to-purple-300 bg-clip-text font-raleway">{about?.last_name || "Okunlola"}</span>,<br />
+                <span className="text-foreground">{about?.title || "a Full-Stack Developer"}</span>
               </motion.h1>
               
               <motion.div 
@@ -442,7 +474,7 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4">My Services</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4"><span className="text-purple-600 dark:text-purple-500">Services</span> I Offer</h2>
               <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4 sm:px-0">
                 I offer a range of services to help you build your web application.
               </p>
@@ -497,9 +529,9 @@ const Home: React.FC = () => {
         </section>
         )}
 
-        {/* Experience Section */}
-        {experience.length > 0 && (
-        <section id="experience" className="py-12 sm:py-16 md:py-20 bg-background">
+        {/* Experience & Education Section */}
+        {(experience.length > 0 || education.length > 0) && (
+        <section id="experience-education" className="py-12 sm:py-16 md:py-20 bg-background">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
             <motion.div 
               className="text-center mb-8 sm:mb-12 md:mb-16"
@@ -508,36 +540,139 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4">My Work Experience</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4">My <span className="text-purple-600 dark:text-purple-400">Professional</span> & <span className="text-purple-600 dark:text-purple-400">Educational</span> Journey</h2>
               <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4 sm:px-0">
                 A journey through my professional career and achievements.
               </p>
             </motion.div>
             
-            <div className="space-y-4 sm:space-y-6 md:space-y-8">
-              {experience.map((exp, index) => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              {/* Experience Card */}
+              {experience.length > 0 && (
                 <motion.div
-                  key={exp.id}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                  initial={{ opacity: 0, x: -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.2 }}
+                  transition={{ duration: 0.8 }}
                   viewport={{ once: true }}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ y: -5 }}
                 >
-                  <Card className="bg-card/50 border-border hover:border-purple-500/50 p-4 sm:p-6 md:p-8 backdrop-blur-sm transition-all duration-300">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                      <div>
-                        <h3 className="text-lg sm:text-xl md:text-2xl text-foreground mb-1 sm:mb-2">{exp.job_title}</h3>
-                        <p className="text-base sm:text-lg text-purple-600 dark:text-purple-400">{exp.company}</p>
+                  <Card className="bg-card/50 border-border hover:border-purple-500/50 p-6 sm:p-8 h-full backdrop-blur-sm transition-all duration-300">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Briefcase className="w-6 h-6 text-white" />
                       </div>
-                      <div className="text-muted-foreground text-xs sm:text-sm md:text-base">
-                        {exp.start_date} - {exp.end_date || 'Present'}
-                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-foreground">Work Experience</h3>
                     </div>
-                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{exp.description}</p>
-                  </Card>
+                    
+                    <div className="space-y-4">
+                      {experience.slice(0, 4).map((exp, index) => (
+                        <motion.div
+                          key={exp.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: index * 0.1 }}
+                          viewport={{ once: true }}
+                          className="relative pl-6 border-l-2 border-purple-200 dark:border-purple-800"
+                        >
+                          <div className="absolute -left-2 top-0 w-4 h-4 bg-purple-500 rounded-full border-2 border-background"></div>
+                          <div className="space-y-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <h4 className="text-base sm:text-lg font-semibold text-foreground">{exp.job_title}</h4>
+                              <span className="text-xs sm:text-sm text-muted-foreground">
+                        {exp.start_date} - {exp.end_date || 'Present'}
+                              </span>
+                      </div>
+                            <p className="text-sm sm:text-base text-purple-600 dark:text-purple-400 font-medium">{exp.company}</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{exp.description}</p>
+                    </div>
                 </motion.div>
               ))}
+                    </div>
+                    
+                    {experience.length > 6 && (
+                      <div className="mt-6 pt-4 border-t border-border">
+                  <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
+                    asChild
+                  >
+                    <a href="/experience">View All Experience</a>
+                  </Button>
+                </div>
+              )}
+                  </Card>
+                </motion.div>
+      )}
+
+              {/* Education Card */}
+      {education.length > 0 && (
+            <motion.div 
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                >
+                  <Card className="bg-card/50 border-border hover:border-purple-500/50 p-6 sm:p-8 h-full backdrop-blur-sm transition-all duration-300">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                        <GraduationCap className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-foreground">Certifications</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {education.slice(0, 4).map((edu, index) => (
+                <motion.div
+                  key={edu.id}
+                          initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                          className="relative pl-6 border-l-2 border-purple-200 dark:border-purple-800"
+                        >
+                          <div className="absolute -left-2 top-0 w-4 h-4 bg-purple-500 rounded-full border-2 border-background"></div>
+                          <div className="space-y-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <h4 className="text-base sm:text-lg font-semibold text-foreground">{edu.degree}</h4>
+                              <span className="text-xs sm:text-sm text-muted-foreground">
+                          {edu.start_date} - {edu.end_date || 'Present'}
+                              </span>
+                        </div>
+                            <p className="text-sm sm:text-base text-purple-600 dark:text-purple-400 font-medium">{edu.institution}</p>
+                        {(edu.certificate || edu.url) && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="mt-2 text-xs border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
+                                asChild
+                              >
+                            <a href={(edu.certificate || edu.url)!} target="_blank" rel="noopener noreferrer">
+                              View Certificate
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                </motion.div>
+              ))}
+            </div>
+                    
+                    {education.length > 6 && (
+                      <div className="mt-6 pt-4 border-t border-border">
+                <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
+                  asChild
+                >
+                  <a href="/education">View All Education</a>
+                </Button>
+              </div>
+                    )}
+                  </Card>
+                </motion.div>
+            )}
             </div>
           </div>
         </section>
@@ -556,7 +691,7 @@ const Home: React.FC = () => {
               >
                 <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-4 sm:mb-6">Why Hire Me For Your Next Project?</h2>
                 <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-                  I bring a unique blend of technical expertise and creative vision to every project.
+                  You're not only getting a developer who can deliver, but also someone who thinks about long-term usability, performance, and your business goals.
                 </p>
                 <div className="space-y-3 sm:space-y-4 md:space-y-6">
                   {skills.map((skill) => (
@@ -653,7 +788,12 @@ const Home: React.FC = () => {
               pagination={{ clickable: true }}
                 className="pb-12"
             >
-                {testimonials.map((testimonial, index) => (
+                {testimonials.map((testimonial, index) => {
+                  const isExpanded = expandedTestimonials.has(testimonial.id);
+                  const feedbackLength = testimonial.feedback?.length || 0;
+                  const shouldShowExpandButton = feedbackLength > 150;
+                  
+                  return (
                 <SwiperSlide key={testimonial.id}>
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
@@ -663,13 +803,51 @@ const Home: React.FC = () => {
                       whileHover={{ y: -5 }}
                       className="h-full"
                     >
-                      <Card className="bg-card/50 border-border hover:border-purple-500/50 p-6 sm:p-8 h-full backdrop-blur-sm transition-all duration-300 group">
-                        <div className="flex mb-4">
+                        <Card className="bg-card/50 border-border hover:border-purple-500/50 p-4 sm:p-6 h-full backdrop-blur-sm transition-all duration-300 group flex flex-col">
+                        <div className="flex">
                         {renderStars(Math.round(testimonial.rating ?? 0))}
                           <span className="ml-2 text-muted-foreground">{Number(testimonial.rating ?? 0).toFixed(1)}</span>
                       </div>
-                        <p className="text-muted-foreground mb-6 italic group-hover:text-foreground transition-colors">"{testimonial.feedback}"</p>
-                        <div className="flex items-center gap-4">
+                          
+                          {/* Feedback with fixed height and expandable functionality */}
+                          <div className="flex-1 flex flex-col mb-3">
+                            <div 
+                              className={`text-muted-foreground italic group-hover:text-foreground transition-colors leading-relaxed expandable-content ${
+                                !isExpanded && shouldShowExpandButton ? 'line-clamp-3' : ''
+                              }`}
+                              style={{
+                                minHeight: shouldShowExpandButton ? '4.5rem' : 'auto',
+                                maxHeight: !isExpanded && shouldShowExpandButton ? '4.5rem' : 'none',
+                                overflow: !isExpanded && shouldShowExpandButton ? 'hidden' : 'visible'
+                              }}
+                            >
+                              "{testimonial.feedback}"
+                            </div>
+                            
+                            {/* Expand/Collapse Button */}
+                            {shouldShowExpandButton && (
+                              <motion.button
+                                onClick={() => toggleTestimonialExpansion(testimonial.id)}
+                                className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1 self-start"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUp className="w-3 h-3" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>Read More</span>
+                                    <ChevronDown className="w-3 h-3" />
+                                  </>
+                                )}
+                              </motion.button>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-2 mt-auto">
                             {testimonial.image && (
                             <motion.img
                               src={testimonial.image}
@@ -689,7 +867,8 @@ const Home: React.FC = () => {
                   </Card>
                     </motion.div>
                 </SwiperSlide>
-              ))}
+                  );
+                })}
             </Swiper>
               
               <div className="flex justify-center gap-4 mt-8">
@@ -748,7 +927,12 @@ const Home: React.FC = () => {
             </motion.div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {projects.slice(0, 5).map((project, index) => (
+              {projects.slice(0, 5).map((project, index) => {
+                const isExpanded = expandedProjects.has(project.id);
+                const descriptionLength = project.description?.length || 0;
+                const shouldShowExpandButton = descriptionLength > 120;
+                
+                return (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 30 }}
@@ -758,19 +942,19 @@ const Home: React.FC = () => {
                   whileHover={{ y: -5 }}
                   className="h-fit"
                 >
-                  <Card className="bg-card/50 border-border hover:border-purple-500/50 overflow-hidden group backdrop-blur-sm transition-all duration-300 h-full">
+                  <Card className="bg-card/50 border-border rounded-lg hover:border-purple-500/50 overflow-hidden group backdrop-blur-sm transition-all duration-300 h-full p-0">
                     {project.image && (
-                      <div className="aspect-video overflow-hidden relative">
+                      <div className="aspect-[2/3] overflow-hidden relative">
                         <motion.img
                           src={project.image}
                           alt={project.title}
                           className="w-full h-full object-cover transition-transform duration-500"
-                          whileHover={{ scale: 1.1 }}
+                          whileHover={{ scale: 1.05 }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
                     )}
-                    <CardContent className="p-4 sm:p-6 font-raleway flex flex-col h-full">
+                      <CardContent className="p-4 sm:p-6 font-raleway flex flex-col h-full">
                       {project.tags && (
                         <motion.div 
                           className="flex flex-wrap gap-2 mb-3 sm:mb-4"
@@ -809,16 +993,54 @@ const Home: React.FC = () => {
                           </motion.div>
                         )}
                       </div>
-                      <p className="text-sm sm:text-base text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">{project.description}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                        
+                        {/* Description with fixed height and expandable functionality */}
+                        <div className="flex-1 flex flex-col">
+                          <div 
+                            className={`text-sm sm:text-base text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed expandable-content ${
+                              !isExpanded && shouldShowExpandButton ? 'line-clamp-3' : ''
+                            }`}
+                            style={{
+                              minHeight: shouldShowExpandButton ? '4.5rem' : 'auto',
+                              maxHeight: !isExpanded && shouldShowExpandButton ? '4.5rem' : 'none',
+                              overflow: !isExpanded && shouldShowExpandButton ? 'hidden' : 'visible'
+                            }}
+                          >
+                            {project.description}
+                      </div>
+                          
+                          {/* Expand/Collapse Button */}
+                          {shouldShowExpandButton && (
+                <motion.button
+                              onClick={() => toggleProjectExpansion(project.id)}
+                              className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1 self-start"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <span>Show Less</span>
+                                  <ChevronUp className="w-3 h-3" />
+                                </>
+                              ) : (
+                                <>
+                                  <span>Read More</span>
+                                  <ChevronDown className="w-3 h-3" />
+                                </>
+                              )}
+                </motion.button>
+                          )}
+            </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
         )}
-
+        
         {/* Contact Section */}
       <section id="contact" className="py-12 sm:py-16 md:py-20 font-raleway bg-gradient-to-br from-background via-secondary/10 to-purple-50/5 dark:to-purple-900/20">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
@@ -830,7 +1052,7 @@ const Home: React.FC = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4">
-              Have An Awesome Project Idea? <span className="text-purple-600 dark:text-purple-400 bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-500 dark:to-purple-300 bg-clip-text ">Let's Discuss</span>
+              Have An Awesome Project Idea? <span className="text-purple-600 dark:text-purple-400 bg-gradient-to-r from-purple-600 to-purple-500 dark:from-purple-500 dark:to-purple-300 bg-clip-text ">Let's Talk About It, I'd Love To Hear From You</span>
             </h2>
           </motion.div>
           

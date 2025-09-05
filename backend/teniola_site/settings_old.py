@@ -1,23 +1,34 @@
 """
-Django production settings for teniola_site project.
+Django settings for teniola_site project.
 """
 
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Determine environment and load appropriate .env file
+DJANGO_ENV = os.getenv("DJANGO_ENV", "production")
+if DJANGO_ENV == "development":
+    env_file = BASE_DIR / ".env.development"
+else:
+    env_file = BASE_DIR / ".env.production"
+
+# Load environment variables from the appropriate file
+if env_file.exists():
+    load_dotenv(env_file)
+else:
+    # Fallback to default .env file
+    load_dotenv()
 
 # -----------------------------------------------------------------------------
 # SECURITY SETTINGS
 # -----------------------------------------------------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is required for production")
+    raise ValueError("SECRET_KEY environment variable is required")
 
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
@@ -34,21 +45,33 @@ ALLOWED_HOSTS = [
     os.getenv("SERVER_IP", "")
 ]
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
-
-# HSTS
-SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "True").lower() == "true"
-SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "True").lower() == "true"
-
-# Cookie security
-CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() == "true"
-SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() == "true"
-
-# Security headers
-SECURE_BROWSER_XSS_FILTER = os.getenv("SECURE_BROWSER_XSS_FILTER", "True").lower() == "true"
-SECURE_CONTENT_TYPE_NOSNIFF = os.getenv("SECURE_CONTENT_TYPE_NOSNIFF", "True").lower() == "true"
+# SSL settings - only enable in production
+if DJANGO_ENV == "production":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
+    
+    # HSTS
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "True").lower() == "true"
+    SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "True").lower() == "true"
+    
+    # Cookie security
+    CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "True").lower() == "true"
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "True").lower() == "true"
+    
+    # Security headers
+    SECURE_BROWSER_XSS_FILTER = os.getenv("SECURE_BROWSER_XSS_FILTER", "True").lower() == "true"
+    SECURE_CONTENT_TYPE_NOSNIFF = os.getenv("SECURE_CONTENT_TYPE_NOSNIFF", "True").lower() == "true"
+else:
+    # Development settings - disable SSL redirect and security headers
+    SECURE_SSL_REDIRECT = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    SECURE_BROWSER_XSS_FILTER = False
+    SECURE_CONTENT_TYPE_NOSNIFF = False
 
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
@@ -58,6 +81,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.teniolaokunlola.com",
     "https://api.teniolaokunlola.com",
     "https://admin.teniolaokunlola.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 # -----------------------------------------------------------------------------
@@ -113,29 +138,40 @@ WSGI_APPLICATION = "teniola_site.wsgi.application"
 # -----------------------------------------------------------------------------
 # DATABASES
 # -----------------------------------------------------------------------------
-if all([
-    os.getenv("SUPABASE_DB_HOST"),
-    os.getenv("SUPABASE_DB_NAME"),
-    os.getenv("SUPABASE_DB_PASSWORD")
-]):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("SUPABASE_DB_NAME"),
-            "USER": os.getenv("SUPABASE_DB_USER", "postgres"),
-            "PASSWORD": os.getenv("SUPABASE_DB_PASSWORD"),
-            "HOST": os.getenv("SUPABASE_DB_HOST"),
-            "PORT": int(os.getenv("SUPABASE_DB_PORT", "5432")),
-            "OPTIONS": {"sslmode": "require"},
-        }
-    }
-else:
+# Force SQLite in development/local runs when explicitly requested.
+FORCE_SQLITE = os.getenv("FORCE_SQLITE", "False").lower() == "true"
+
+if FORCE_SQLITE:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+else:
+    if all([
+        os.getenv("SUPABASE_DB_HOST"),
+        os.getenv("SUPABASE_DB_NAME"),
+        os.getenv("SUPABASE_DB_PASSWORD")
+    ]):
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": os.getenv("SUPABASE_DB_NAME"),
+                "USER": os.getenv("SUPABASE_DB_USER", "postgres"),
+                "PASSWORD": os.getenv("SUPABASE_DB_PASSWORD"),
+                "HOST": os.getenv("SUPABASE_DB_HOST"),
+                "PORT": int(os.getenv("SUPABASE_DB_PORT", "5432")),
+                "OPTIONS": {"sslmode": "require"},
+            }
+        }
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
 
 # -----------------------------------------------------------------------------
 # PASSWORD VALIDATION

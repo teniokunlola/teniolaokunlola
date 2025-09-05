@@ -67,6 +67,8 @@ class Education(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    url = models.URLField(max_length=200, blank=True, null=True)
+    certificate = models.FileField(upload_to='education/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.degree} from {self.institution}"

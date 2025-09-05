@@ -32,22 +32,22 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Modal */}
-      <Card className={`relative w-full mx-4 shadow-xl ${sizeClasses[size]}`}>
-        <CardHeader>
+      <Card className={`relative w-full mx-4 shadow-xl bg-card text-card-foreground border border-border ${sizeClasses[size]}`}>
+        <CardHeader className="border-b border-border/50">
           <CardTitle>{title}</CardTitle>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="bg-card/95">
           {children}
         </CardContent>
         
         {footer && (
-          <CardFooter>
+          <CardFooter className="border-t border-border/50">
             {footer}
           </CardFooter>
         )}

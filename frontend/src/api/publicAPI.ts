@@ -35,12 +35,16 @@ export interface PublicEducation {
   institution: string;
   start_date: string;
   end_date?: string;
+  url?: string;
+  certificate?: string;
   created_at: string;
 }
 
 export interface PublicAbout {
   id: number;
   full_name: string;
+  first_name: string;
+  last_name: string;
   title? : string;
   profile_picture?: string;
   summary: string;

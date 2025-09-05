@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, type User } from 'firebase/auth';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { getAuth, onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../api/firebaseConfig';
 import { buildApiUrl } from '../api/config';
@@ -9,11 +9,6 @@ import { getErrorMessage } from '../types/errors';
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
-// Set persistence to local to maintain login state across sessions
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-    logger.error('Failed to set auth persistence', { error });
-});
 
 // Define admin user interface
 interface AdminUser {
@@ -74,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const lastFetchTime = useRef<number>(0);
+    const [lastFetchTime, setLastFetchTime] = useState<number>(0);
     const [lastActivityTime, setLastActivityTime] = useState<number>(Date.now());
 
     // Check if user is admin and get admin details
@@ -98,11 +93,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             // Debounce: prevent rapid API calls (wait at least 1 second between calls)
             const now = Date.now();
-            if (now - lastFetchTime.current < 1000 && retryCount === 0) {
+            if (now - lastFetchTime < 1000 && retryCount === 0) {
                 logger.debug('Debouncing API call, waiting...');
                 return;
             }
-            lastFetchTime.current = now;
+            setLastFetchTime(now);
 
             logger.debug('Fetching admin user for Firebase user', { email: firebaseUser.email });
 
@@ -156,7 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setAdminUser(null);
             setError('Failed to fetch admin user.');
         }
-    }, []);
+    }, [lastFetchTime]);
 
     // Refresh admin user data
     const refreshAdminUser = async () => {
@@ -170,6 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             await signOut(auth);
             setUser(null);
             setAdminUser(null);
+            localStorage.removeItem('firebase_user');
         } catch (err) {
             const errorMessage = getErrorMessage(err);
             logger.error('Logout failed', { error: err });
@@ -181,12 +177,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setError(null);
     };
 
-    // Function to check inactivity and logout after 1 hour
+    // Function to check inactivity and logout after 1 hour 10 minutes
     const checkInactivity = () => {
         const now = Date.now();
-        const inactivityLimit = 60 * 60 * 1000; // 1 hour in milliseconds
+        const inactivityLimit = 70 * 60 * 1000; // 1 hour 10 minutes in milliseconds
         if (now - lastActivityTime > inactivityLimit) {
-            logger.debug('User inactive for 1 hour, logging out');
+            logger.debug('User inactive for 1 hour 10 minutes, logging out');
             logout();
         }
     };
@@ -216,46 +212,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
     }, []);
 
-    // Rehydrate user data on app initialization
     useEffect(() => {
-        const rehydrateUser = async () => {
+        // Check for persisted session on app start
+        const persistedUser = localStorage.getItem('firebase_user');
+        if (persistedUser) {
             try {
-                // Check if there's a current user in Firebase auth
-                const currentUser = auth.currentUser;
-                if (currentUser) {
-                    logger.debug('Rehydrating user data for existing Firebase user', { uid: currentUser.uid });
-                    // Fetch admin user data if not already available
-                    if (!adminUser || adminUser.firebase_uid !== currentUser.uid) {
-                        await fetchAdminUser(currentUser);
-                    }
-                } else {
-                    logger.debug('No existing Firebase user found during rehydration');
-                }
+                const userData = JSON.parse(persistedUser);
+                setLastActivityTime(userData.lastActivityTime || Date.now());
             } catch (error) {
-                logger.error('Failed to rehydrate user data', { error });
-                // Don't set loading to false here - let the auth state listener handle it
+                logger.error('Failed to parse persisted user data:', { error });
+                localStorage.removeItem('firebase_user');
             }
-        };
-
-        // Only run rehydration if we haven't loaded yet
-        if (loading) {
-            rehydrateUser();
         }
-    }, [loading, adminUser, fetchAdminUser]);
 
-    // This listener will fire whenever the user's sign-in state changes
-    useEffect(() => {
-        // Add a timeout to prevent indefinite loading
-        const loadingTimeout = setTimeout(() => {
-            if (loading) {
-                logger.warn('Auth state loading timeout - forcing completion');
-                setLoading(false);
-            }
-        }, 10000); // 10 second timeout
-
+        // This listener will fire whenever the user's sign-in state changes
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            logger.debug('Auth state changed', { hasUser: !!currentUser, uid: currentUser?.uid });
-
             setUser((prevUser) => {
                 if (prevUser?.uid !== currentUser?.uid) {
                     return currentUser;
@@ -264,42 +235,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
 
             if (currentUser) {
+                // Persist user session
+                localStorage.setItem('firebase_user', JSON.stringify({
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    lastActivityTime: Date.now()
+                }));
+
                 // Only fetch admin user data if we don't already have it for this user
                 // or if the current user is different from the one we have data for
                 if (!adminUser || adminUser.firebase_uid !== currentUser.uid) {
-                    logger.debug('Fetching admin user data for authenticated user');
                     try {
-                        await fetchAdminUser(currentUser);
+                        fetchAdminUser(currentUser);
                     } catch (error) {
                         logger.error('Failed to fetch admin user:', { error });
                         setAdminUser(null);
-                        // Don't set loading to false on error - let it retry
-                        return;
                     }
-                } else {
-                    logger.debug('Admin user data already available, skipping fetch');
                 }
             } else {
-                logger.debug('No authenticated user, clearing admin data');
                 setAdminUser(null);
+                localStorage.removeItem('firebase_user');
             }
 
-            // Clear the timeout since we got a definitive auth state
-            clearTimeout(loadingTimeout);
             setLoading(false);
         }, (error) => {
-            logger.error('Auth state change error', { error });
             setError(error.message);
-            clearTimeout(loadingTimeout);
             setLoading(false);
         });
 
-        // Cleanup the listener and timeout on component unmount
-        return () => {
-            unsubscribe();
-            clearTimeout(loadingTimeout);
-        };
-    }, [adminUser, fetchAdminUser, loading]);
+        // Cleanup the listener on component unmount
+        return () => unsubscribe();
+    }, [adminUser, fetchAdminUser]);
 
     // The value that will be provided to consumers of the context
     const value: AuthContextType = { 
