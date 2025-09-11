@@ -23,6 +23,7 @@ const EditAbout: React.FC = () => {
   const [profileFile, setProfileFile] = React.useState<File | null>(null);
   const [resumeFile, setResumeFile] = React.useState<File | null>(null);
   const [saving, setSaving] = React.useState(false);
+  const [showForm, setShowForm] = React.useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [toDeleteId, setToDeleteId] = React.useState<number | null>(null);
 
@@ -37,17 +38,12 @@ const EditAbout: React.FC = () => {
 
   React.useEffect(() => { fetchAbout(); }, [fetchAbout]);
 
-  // If an About already exists, default to editing it
-  React.useEffect(() => {
-    if (items.length > 0) {
-      setEditing(items[0]);
-      setForm({ ...items[0] });
-    }
-  }, [items]);
+  // Remove automatic editing - form should only show when explicitly requested
 
   const handleEdit = (item: About) => {
     setEditing(item);
     setForm({ ...item });
+    setShowForm(true);
   };
 
   const handleAdd = () => {
@@ -55,12 +51,14 @@ const EditAbout: React.FC = () => {
     if (items.length > 0) {
       setEditing(items[0]);
       setForm({ ...items[0] });
+      setShowForm(true);
       return;
     }
     setEditing(null);
     setForm({ full_name: '', first_name: '', last_name: '', title: '', summary: '', email: '', phone_number: '', address: '', profile_picture: '', resume: '' });
     setProfileFile(null);
     setResumeFile(null);
+    setShowForm(true);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -107,6 +105,7 @@ const EditAbout: React.FC = () => {
       setForm({ full_name: '', first_name: '', last_name: '', title: '', summary: '', email: '', phone_number: '', address: '', profile_picture: '', resume: '' });
       setProfileFile(null);
       setResumeFile(null);
+      setShowForm(false);
     } catch (err: any) {
       setError(err.message || 'Failed to save about info');
     } finally {
@@ -155,11 +154,9 @@ const EditAbout: React.FC = () => {
         subtitle="Update your personal information displayed on the site"
         icon={User}
       >
-        {items.length === 0 && (
-          <AdminActionButton variant="primary" icon={Plus} onClick={handleAdd}>
-            Add About Entry
-          </AdminActionButton>
-        )}
+        <AdminActionButton variant="primary" icon={Plus} onClick={handleAdd}>
+          {items.length === 0 ? 'Add About Entry' : 'Update About'}
+        </AdminActionButton>
       </AdminPageHeader>
 
       {error && (
@@ -168,8 +165,9 @@ const EditAbout: React.FC = () => {
         </div>
       )}
 
-      <AdminFormSection title={editing ? 'Edit About' : 'Add About'}>
-        <form onSubmit={handleSave} className="space-y-4">
+      {showForm ? (
+        <AdminFormSection title={editing ? 'Edit About' : 'Add About'}>
+          <form onSubmit={handleSave} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Full Name</label>
@@ -225,15 +223,16 @@ const EditAbout: React.FC = () => {
             <input type="file" accept="application/pdf" onChange={(e) => setResumeFile(e.target.files?.[0] || null)} className="admin-form-input" />
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-500/20">
-            <AdminActionButton variant="outline" icon={User} onClick={() => { setEditing(null); setForm({ full_name: '', first_name: '', last_name: '', title: '', summary: '', email: '', phone_number: '', address: '', profile_picture: '', resume: '' }); setProfileFile(null); setResumeFile(null); }} disabled={saving}>
+            <AdminActionButton variant="outline" icon={User} onClick={() => { setEditing(null); setForm({ full_name: '', first_name: '', last_name: '', title: '', summary: '', email: '', phone_number: '', address: '', profile_picture: '', resume: '' }); setProfileFile(null); setResumeFile(null); setShowForm(false); }} disabled={saving}>
               Cancel
             </AdminActionButton>
             <AdminActionButton variant="primary" icon={Plus} onClick={() => { const fakeEvent = { preventDefault: () => {} } as React.FormEvent; handleSave(fakeEvent); }} disabled={saving} loading={saving}>
               {saving ? 'Saving...' : editing ? 'Update About' : 'Add About'}
             </AdminActionButton>
           </div>
-        </form>
-      </AdminFormSection>
+          </form>
+        </AdminFormSection>
+      ) : null}
 
       <AdminDataTable headers={[ 'Name', 'Title', 'Email', 'Phone', 'Address', 'Summary', 'Actions' ]} loading={loading} emptyMessage="No about entries found.">
         {items.map(item => (

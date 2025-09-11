@@ -29,7 +29,7 @@ class About(models.Model):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
-    profile_picture = models.ImageField(upload_to='about/')
+    profile_picture = models.ImageField(upload_to='about/', blank=True, null=True)
     summary = models.TextField()
     email = models.EmailField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
@@ -43,9 +43,16 @@ class About(models.Model):
         return self.full_name
 
     def save(self, *args, **kwargs):
-        # Enforce the singleton pattern
+        # Enforce the singleton pattern - allow updates to existing entries
         if About.objects.exists() and not self.pk:
-            raise ValidationError("There can only be one About section.")
+            # If we're trying to create a new entry but one exists, update the existing one instead
+            existing_about = About.objects.first()
+            if existing_about:
+                # Copy the data to the existing entry
+                for field in self._meta.fields:
+                    if field.name != 'id':
+                        setattr(existing_about, field.name, getattr(self, field.name))
+                return existing_about.save(*args, **kwargs)
         return super().save(*args, **kwargs)
 
 class Experience(models.Model):

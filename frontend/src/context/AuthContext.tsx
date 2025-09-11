@@ -130,16 +130,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     return;
                 }
                 throw new Error(errorText);
-            } else if (response.status === 404 && retryCount < 3) {
-                // Admin user not found in backend - retry after delay
-                logger.debug('Admin user not found, retrying in 1.5s...');
+            } else if (response.status === 404 && retryCount < 1) {
+                // Admin user not found in backend - retry once after delay
+                logger.debug('Admin user not found, retrying in 1s...');
                 setTimeout(() => {
                     fetchAdminUser(firebaseUser, retryCount + 1);
-                }, 1500);
+                }, 1000);
             } else if (response.status === 404) {
                 // After retries, show error
                 setAdminUser(null);
-                setError('Admin account not found. Please wait a moment and try again.');
+                setError('Admin account not found. Please contact support.');
             } else {
                 const errorText = await response.text();
                 logger.error('Failed to fetch admin user', { status: response.status, error: errorText });
@@ -225,8 +225,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         }
 
+        // Set a timeout to prevent infinite loading
+        const loadingTimeout = setTimeout(() => {
+            if (loading) {
+                logger.warn('Authentication loading timeout, setting loading to false');
+                setLoading(false);
+            }
+        }, 10000); // 10 second timeout
+
         // This listener will fire whenever the user's sign-in state changes
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            logger.debug('Firebase auth state changed', { 
+                hasUser: !!currentUser, 
+                uid: currentUser?.uid,
+                email: currentUser?.email 
+            });
+
             setUser((prevUser) => {
                 if (prevUser?.uid !== currentUser?.uid) {
                     return currentUser;
@@ -246,7 +260,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 // or if the current user is different from the one we have data for
                 if (!adminUser || adminUser.firebase_uid !== currentUser.uid) {
                     try {
-                        fetchAdminUser(currentUser);
+                        await fetchAdminUser(currentUser);
                     } catch (error) {
                         logger.error('Failed to fetch admin user:', { error });
                         setAdminUser(null);
@@ -257,15 +271,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 localStorage.removeItem('firebase_user');
             }
 
+            // Only set loading to false after Firebase auth state is determined
             setLoading(false);
+            clearTimeout(loadingTimeout);
         }, (error) => {
+            logger.error('Firebase auth state error:', { error });
             setError(error.message);
             setLoading(false);
+            clearTimeout(loadingTimeout);
         });
 
         // Cleanup the listener on component unmount
-        return () => unsubscribe();
-    }, [adminUser, fetchAdminUser]);
+        return () => {
+            unsubscribe();
+            clearTimeout(loadingTimeout);
+        };
+    }, [adminUser, fetchAdminUser, loading]);
 
     // The value that will be provided to consumers of the context
     const value: AuthContextType = { 

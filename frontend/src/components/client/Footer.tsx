@@ -1,6 +1,20 @@
 import React from 'react';
 
-import { Github, Linkedin, Twitter, Mail, Phone, MapPin, Heart } from 'lucide-react';
+import { 
+  Github, 
+  Linkedin, 
+  Twitter, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Heart,
+  Instagram,
+  Facebook,
+  Youtube,
+  MessageCircle,
+  Bookmark,
+  Users
+} from 'lucide-react';
 import { useSettingsStore, useUIStore, useThemeSync } from '@/store';
 
 import '@/index.css'
@@ -35,13 +49,70 @@ const Footer: React.FC = () => {
     { name: 'Contact', id: 'contact' },
   ];
 
-  // Fallbacks for social links, email, phone, address
-  const socialLinks = [
-    { icon: Github, href: settings.site_github || 'https://github.com', label: 'GitHub' },
-    { icon: Linkedin, href: settings.site_linkedin || 'https://linkedin.com', label: 'LinkedIn' },
-    { icon: Twitter, href: settings.site_twitter || 'https://twitter.com', label: 'Twitter' },
-    { icon: Mail, href: `mailto:${settings.site_email || 'teniolaokunlola@proton.me'}`, label: 'Email' },
-  ];
+  // Dynamic social links - only show icons when URLs are provided
+  const getSocialLinks = () => {
+    const socialPlatforms = [
+      { 
+        key: 'site_github', 
+        icon: Github, 
+        label: 'GitHub',
+        url: settings.site_github
+      },
+      { 
+        key: 'site_linkedin', 
+        icon: Linkedin, 
+        label: 'LinkedIn',
+        url: settings.site_linkedin
+      },
+      { 
+        key: 'site_twitter', 
+        icon: Twitter, 
+        label: 'Twitter',
+        url: settings.site_twitter
+      },
+      { 
+        key: 'site_instagram', 
+        icon: Instagram, 
+        label: 'Instagram',
+        url: settings.site_instagram
+      },
+      { 
+        key: 'site_facebook', 
+        icon: Facebook, 
+        label: 'Facebook',
+        url: settings.site_facebook
+      },
+      { 
+        key: 'site_youtube', 
+        icon: Youtube, 
+        label: 'YouTube',
+        url: settings.site_youtube
+      },
+      { 
+        key: 'site_tiktok', 
+        icon: MessageCircle, 
+        label: 'TikTok',
+        url: settings.site_tiktok
+      },
+      { 
+        key: 'site_pinterest', 
+        icon: Bookmark, 
+        label: 'Pinterest',
+        url: settings.site_pinterest
+      },
+      { 
+        key: 'site_reddit', 
+        icon: Users, 
+        label: 'Reddit',
+        url: settings.site_reddit
+      }
+    ];
+
+    // Filter out platforms that don't have URLs
+    return socialPlatforms.filter(platform => platform.url && platform.url.trim() !== '');
+  };
+
+  const socialLinks = getSocialLinks();
 
   return (
     <footer className="bg-background text-foreground border-t border-purple-800 rounded-t-3xl" data-theme={theme}>
@@ -58,18 +129,24 @@ const Footer: React.FC = () => {
               </p>
             </div>
             <div className="flex space-x-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-muted rounded-3xl flex items-center justify-center hover:bg-muted/80 transition-colors group"
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </a>
-              ))}
+              {socialLinks.length > 0 ? (
+                socialLinks.map((social) => (
+                  <a
+                    key={social.key}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-muted rounded-3xl flex items-center justify-center hover:bg-muted/80 transition-colors group"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </a>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm font-raleway">
+                  No social links configured
+                </p>
+              )}
             </div>
           </div>
 

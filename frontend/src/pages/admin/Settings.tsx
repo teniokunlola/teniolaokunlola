@@ -566,6 +566,81 @@ const Settings: React.FC = () => {
                   className="admin-form-input"
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="site_facebook" className="text-sm font-medium text-foreground">
+                  Facebook URL
+                </Label>
+                <Input
+                  id="site_facebook"
+                  name="site_facebook"
+                  type="url"
+                  value={form.site_facebook || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://facebook.com/username"
+                  className="admin-form-input"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="site_youtube" className="text-sm font-medium text-foreground">
+                  YouTube URL
+                </Label>
+                <Input
+                  id="site_youtube"
+                  name="site_youtube"
+                  type="url"
+                  value={form.site_youtube || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://youtube.com/@username"
+                  className="admin-form-input"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="site_tiktok" className="text-sm font-medium text-foreground">
+                  TikTok URL
+                </Label>
+                <Input
+                  id="site_tiktok"
+                  name="site_tiktok"
+                  type="url"
+                  value={form.site_tiktok || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://tiktok.com/@username"
+                  className="admin-form-input"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="site_pinterest" className="text-sm font-medium text-foreground">
+                  Pinterest URL
+                </Label>
+                <Input
+                  id="site_pinterest"
+                  name="site_pinterest"
+                  type="url"
+                  value={form.site_pinterest || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://pinterest.com/username"
+                  className="admin-form-input"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="site_reddit" className="text-sm font-medium text-foreground">
+                  Reddit URL
+                </Label>
+                <Input
+                  id="site_reddit"
+                  name="site_reddit"
+                  type="url"
+                  value={form.site_reddit || ''}
+                  onChange={handleInputChange}
+                  placeholder="https://reddit.com/u/username"
+                  className="admin-form-input"
+                />
+              </div>
             </div>
           </AdminFormSection>
 

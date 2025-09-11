@@ -440,7 +440,7 @@ const Home: React.FC = () => {
                       transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                       whileHover={{ scale: 1.2 }}
                     >
-                      <span className="text-lg sm:text-xl md:text-2xl">👋</span>
+                      <span className="text-lg sm:text-xl md:text-2xl">👋🏾</span>
                     </motion.div>
                   </div>
                 </motion.div>
@@ -885,7 +885,7 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
-      )}
+        )}
 
         {/* Testimonials Section */}
         {testimonials.length > 0 && (
@@ -912,8 +912,8 @@ const Home: React.FC = () => {
               touchRatio={1}
               touchAngle={45}
               threshold={5}
-              touchStartPreventDefault={false}
-              touchMoveStopPropagation={false}
+              touchStartPreventDefault={true}
+              touchMoveStopPropagation={true}
               simulateTouch={true}
               grabCursor={true}
               autoplay={{
@@ -940,20 +940,12 @@ const Home: React.FC = () => {
                   navigation.nextEl = testimonialsNextRef.current;
                 }
               }}
-              onTouchStart={(_, event) => {
-                // Prevent conflicts with other touch interactions
-                event.stopPropagation();
-              }}
-              onTouchMove={(_, event) => {
-                // Allow smooth touch movement
-                event.stopPropagation();
-              }}
               pagination={{ 
                 clickable: true,
                 dynamicBullets: true,
                 dynamicMainBullets: 3
               }}
-              className="pb-12"
+                className="pb-12"
             >
                 {testimonials.map((testimonial, index) => {
                   const isExpanded = expandedTestimonials.has(testimonial.id);
