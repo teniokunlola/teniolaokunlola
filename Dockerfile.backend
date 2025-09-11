@@ -27,8 +27,7 @@ COPY backend/ .
 # Create directories for static files and media
 RUN mkdir -p /app/staticfiles /app/media
 
-# Collect static files
-RUN python manage.py collectstatic --noinput --settings=teniola_site.settings
+# Defer staticfiles collection to runtime (handled by deploy script)
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser && \

@@ -130,7 +130,10 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  background-image: linear-gradient(to bottom, var(--background), var(--secondary)/10, var(--purple-50)/5);
 }
 
 /* ===== GLOBAL SCROLLBAR REMOVAL ===== */

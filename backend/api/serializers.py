@@ -25,12 +25,28 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
+        # Parse tags if sent as JSON string in multipart
+        try:
+            tags_value = self.context['request'].data.get('tags')
+            if isinstance(tags_value, str) and tags_value.strip() != '':
+                import json
+                validated_data['tags'] = json.loads(tags_value)
+        except Exception:
+            pass
         image = self.context['request'].FILES.get('image')
         if image:
             validated_data['image'] = image
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
+        # Parse tags if sent as JSON string in multipart
+        try:
+            tags_value = self.context['request'].data.get('tags')
+            if isinstance(tags_value, str) and tags_value.strip() != '':
+                import json
+                validated_data['tags'] = json.loads(tags_value)
+        except Exception:
+            pass
         image = self.context['request'].FILES.get('image')
         if image:
             validated_data['image'] = image
@@ -45,6 +61,19 @@ class ExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Experience
         fields = '__all__'
+
+    # Map generic 'image' upload key to model field 'company_logo'
+    def create(self, validated_data):
+        image = self.context['request'].FILES.get('image') or self.context['request'].FILES.get('company_logo')
+        if image:
+            validated_data['company_logo'] = image
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        image = self.context['request'].FILES.get('image') or self.context['request'].FILES.get('company_logo')
+        if image:
+            validated_data['company_logo'] = image
+        return super().update(instance, validated_data)
 
 class EducationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -118,6 +147,24 @@ class SettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Setting
         fields = '__all__'
+
+    def create(self, validated_data):
+        site_logo = self.context['request'].FILES.get('site_logo')
+        if site_logo:
+            validated_data['site_logo'] = site_logo
+        site_favicon = self.context['request'].FILES.get('site_favicon')
+        if site_favicon:
+            validated_data['site_favicon'] = site_favicon
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        site_logo = self.context['request'].FILES.get('site_logo')
+        if site_logo:
+            validated_data['site_logo'] = site_logo
+        site_favicon = self.context['request'].FILES.get('site_favicon')
+        if site_favicon:
+            validated_data['site_favicon'] = site_favicon
+        return super().update(instance, validated_data)
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:

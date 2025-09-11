@@ -1,8 +1,6 @@
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminAPI, { type About } from '@/api/adminAPI';
-import { authFetch } from '@/api/authFetch';
-import { buildApiUrl } from '@/api/config';
 import { Input } from '@/components/ui/input';
 import ImageUpload from '@/components/ui/image-upload';
 import { 
@@ -39,12 +37,26 @@ const EditAbout: React.FC = () => {
 
   React.useEffect(() => { fetchAbout(); }, [fetchAbout]);
 
+  // If an About already exists, default to editing it
+  React.useEffect(() => {
+    if (items.length > 0) {
+      setEditing(items[0]);
+      setForm({ ...items[0] });
+    }
+  }, [items]);
+
   const handleEdit = (item: About) => {
     setEditing(item);
     setForm({ ...item });
   };
 
   const handleAdd = () => {
+    // Enforce singleton: if an entry exists, switch to edit mode instead of creating
+    if (items.length > 0) {
+      setEditing(items[0]);
+      setForm({ ...items[0] });
+      return;
+    }
     setEditing(null);
     setForm({ full_name: '', first_name: '', last_name: '', title: '', summary: '', email: '', phone_number: '', address: '', profile_picture: '', resume: '' });
     setProfileFile(null);
@@ -143,9 +155,11 @@ const EditAbout: React.FC = () => {
         subtitle="Update your personal information displayed on the site"
         icon={User}
       >
-        <AdminActionButton variant="primary" icon={Plus} onClick={handleAdd}>
-          Add About Entry
-        </AdminActionButton>
+        {items.length === 0 && (
+          <AdminActionButton variant="primary" icon={Plus} onClick={handleAdd}>
+            Add About Entry
+          </AdminActionButton>
+        )}
       </AdminPageHeader>
 
       {error && (

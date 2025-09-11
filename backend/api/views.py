@@ -48,25 +48,25 @@ from .serializers import (
 # Create your views here.
 
 class ProjectAdminViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by('-created_at')
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
 
 class SkillAdminViewSet(viewsets.ModelViewSet):
-    queryset = Skill.objects.all()
+    queryset = Skill.objects.all().order_by('-created_at')
     serializer_class = SkillSerializer
     permission_classes = [IsAuthenticated]
 
 class TestimonialAdminViewSet(viewsets.ModelViewSet):
-    queryset = Testimonial.objects.all()
+    queryset = Testimonial.objects.all().order_by('-created_at')
     serializer_class = TestimonialSerializer
     permission_classes = [IsAuthenticated]
 class ExperienceAdminViewSet(viewsets.ModelViewSet):
-    queryset = Experience.objects.all()
+    queryset = Experience.objects.all().order_by('-created_at')
     serializer_class = ExperienceSerializer
     permission_classes = [IsAuthenticated]
 class EducationAdminViewSet(viewsets.ModelViewSet):
-    queryset = Education.objects.all()
+    queryset = Education.objects.all().order_by('-created_at')
     serializer_class = EducationSerializer
     permission_classes = [IsAuthenticated]
 class AboutAdminViewSet(viewsets.ModelViewSet):
@@ -74,11 +74,11 @@ class AboutAdminViewSet(viewsets.ModelViewSet):
     serializer_class = AboutSerializer
     permission_classes = [IsAuthenticated]
 class ContactAdminViewSet(viewsets.ModelViewSet):
-    queryset = Contact.objects.all()
+    queryset = Contact.objects.all().order_by('-created_at')
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated]
 class SocialLinkAdminViewSet(viewsets.ModelViewSet):
-    queryset = SocialLink.objects.all()
+    queryset = SocialLink.objects.all().order_by('-created_at')
     serializer_class = SocialLinkSerializer
     permission_classes = [IsAuthenticated]
 class SettingAdminViewSet(viewsets.ModelViewSet):
@@ -86,7 +86,7 @@ class SettingAdminViewSet(viewsets.ModelViewSet):
     serializer_class = SettingSerializer
     permission_classes = [IsAuthenticated]
 class ServiceAdminViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()
+    queryset = Service.objects.all().order_by('-created_at')
     serializer_class = ServiceSerializer
     permission_classes = [IsAuthenticated]
 
@@ -96,7 +96,7 @@ class ServiceAdminViewSet(viewsets.ModelViewSet):
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class ProjectList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by('-created_at')
     serializer_class = ProjectSerializer
     pagination_class = None  # Disable pagination for public API
 
@@ -104,21 +104,21 @@ class ProjectList(generics.ListAPIView):
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class SkillList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Skill.objects.all()
+    queryset = Skill.objects.all().order_by('-created_at')
     serializer_class = SkillSerializer
     pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ExperienceList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Experience.objects.all()
+    queryset = Experience.objects.all().order_by('-created_at')
     serializer_class = ExperienceSerializer
     pagination_class = None  # Disable pagination for public API
 
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class EducationList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Education.objects.all()
+    queryset = Education.objects.all().order_by('-created_at')
     serializer_class = EducationSerializer
     pagination_class = None  # Disable pagination for public API
 
@@ -132,7 +132,7 @@ class AboutList(generics.ListAPIView):
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class SocialLinkList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = SocialLink.objects.all()
+    queryset = SocialLink.objects.all().order_by('-created_at')
     serializer_class = SocialLinkSerializer
     pagination_class = None  # Disable pagination for public API
 
@@ -162,7 +162,7 @@ class ContactCreate(generics.CreateAPIView):
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class TestimonialList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Testimonial.objects.all()
+    queryset = Testimonial.objects.all().order_by('-created_at')
     serializer_class = TestimonialSerializer
     pagination_class = None  # Disable pagination for public API
 
@@ -178,7 +178,7 @@ class SettingList(generics.ListAPIView):
 @method_decorator(csrf_exempt, name='dispatch')  # <-- Apply CSRF exemption
 class ServiceList(generics.ListAPIView):
     permission_classes = [AllowAny]
-    queryset = Service.objects.all()
+    queryset = Service.objects.all().order_by('-created_at')
     serializer_class = ServiceSerializer
     pagination_class = None  # Disable pagination for public API
 

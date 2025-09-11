@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Menu, X } from 'lucide-react';
-import { useSettingsStore, useUIStore, useThemeSync } from '@/store';
+import { useSettingsStore, useAboutStore, useUIStore, useThemeSync } from '@/store';
 import '@/index.css'
 
 const navigation = [
   { name: 'Home', id: 'home' },
   // { name: 'About', id: 'about' },
   { name: 'Services', id: 'services' },
-  { name: 'Experience', id: 'experience' },
-  { name: 'Education', id: 'education' },
   { name: 'Projects', id: 'projects' },
+  { name: 'Certifications', id: 'certifications' },
   { name: 'Testimonials', id: 'testimonials' },
   { name: 'Contact', id: 'contact' }
 ];
@@ -21,12 +20,16 @@ const Header: React.FC = () => {
   useThemeSync();
   const theme = useUIStore(state => state.theme);
   const { settings, fetchSettings } = useSettingsStore();
+  const { about, fetchAbout } = useAboutStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
 
   React.useEffect(() => {
     if (!settings.site_name) fetchSettings();
   }, [settings.site_name, fetchSettings]);
+  React.useEffect(() => {
+    if (!about.first_name) fetchAbout();
+  }, [about.first_name, fetchAbout]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -64,14 +67,13 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="w-full pt-3 sm:pt-4 pb-1 sm:pb-2 fixed top-0 left-0 right-0 z-50" data-theme={theme}>
+    <header className="w-full fixed top-0 left-0 right-0 z-50" data-theme={theme}>
       <div className=" flex items-center justify-between px-3 sm:px-6 rounded-full m-4 mb-0 border-2 border-purple-800 p-2 bg-background  sm:m-6 sm:p-3 max-sm:p-4">
         {/* Logo */}
         <Link to="/" className="flex items-center select-none z-20">
           <span
             className="sm:text-3xl md:text-3xl max-sm:text-3xl font-bold tracking-tight font-radio-canada uppercase text-foreground"
-          > Teniola
-            {/* {settings.siteName || 'Teniola'} */}
+          > {about.first_name || 'Teniola'} 
           </span>
         </Link>
         {/* Desktop Navigation Bar */}

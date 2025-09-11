@@ -2,13 +2,11 @@ import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { motion } from 'framer-motion';
-
 import ClientLayout from '@/components/client/ClientLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Mail, Download, Sun, Moon, Sparkles, Star, ArrowRight, Phone, MapPin, ChevronDown, ChevronUp, GraduationCap, Briefcase } from 'lucide-react';
-import { useScroll, useTransform } from 'framer-motion';
 import PublicAPI, {
   type PublicAbout,
   type PublicProject,
@@ -55,9 +53,6 @@ const Home: React.FC = () => {
 
   const testimonialsPrevRef = React.useRef<HTMLButtonElement>(null);
   const testimonialsNextRef = React.useRef<HTMLButtonElement>(null);
-
-  const { scrollYProgress } = useScroll();
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   // Theme toggle function
   const toggleTheme = () => {
@@ -239,9 +234,9 @@ const Home: React.FC = () => {
 
   return (
     <ClientLayout>
-    <div className="mt-16 min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-300">
+    <div className="mt-14 bg-background text-foreground overflow-x-hidden">
       {/* Animated Background */}
-      <motion.div 
+      {/* <motion.div 
         className="fixed inset-0 z-0"
         style={{ 
           background: isDarkMode 
@@ -249,11 +244,11 @@ const Home: React.FC = () => {
             : "radial-gradient(ellipse at top, rgba(139, 92, 246, 0.05) 0%, transparent 50%)",
           y: backgroundY 
         }}
-      />
+      /> */}
 
       {/* Theme Toggle Button */}
       <motion.div 
-        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50"
+        className="fixed top-2 right-2 sm:top-2 sm:right-2 z-50"
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 1, type: "spring", stiffness: 300 }}
@@ -279,7 +274,7 @@ const Home: React.FC = () => {
       </motion.div>
 
       {/* Hero Section */}
-      <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/20 to-purple-50/10 dark:to-purple-900/20 pt-16 sm:pt-20 pb-12 sm:pb-16 lg:pb-32">
+      <section id="home" className="relative flex items-center justify-center pt-16 sm:pt-20 pb-12 sm:pb-16 lg:pb-32 bg-gradient-to-br from-background via-secondary/20 to-purple-50/10 dark:to-purple-900/20 pt-16 sm:pt-20 pb-12 sm:pb-16 lg:pb-32">
         {/* Floating particles */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(20)].map((_, i) => (
@@ -382,7 +377,7 @@ const Home: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{about.email}</span>
+                    <a href={`mailto:${about.email}`} className='hidden sm:inline' target="_blank" rel="noopener noreferrer">{about.email}</a>
                     <span className="sm:hidden">Email</span>
                   </motion.div>
                 )}
@@ -392,7 +387,7 @@ const Home: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{about.phone_number}</span>
+                    <a href={`tel:${about.phone_number}`} className='hidden sm:inline' target="_blank" rel="noopener noreferrer">{about.phone_number}</a>
                     <span className="sm:hidden">Phone</span>
                   </motion.div>
                 )}
@@ -402,7 +397,7 @@ const Home: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{about.address}</span>
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(about.address)}`} className='hidden sm:inline' target="_blank" rel="noopener noreferrer">{about.address}</a>
                     <span className="sm:hidden">Location</span>
                   </motion.div>
                 )}
@@ -529,9 +524,223 @@ const Home: React.FC = () => {
         </section>
         )}
 
-        {/* Experience & Education Section */}
+        {/* Skills Section */}
+      {skills.length > 0 && (
+        <section id="skills" className="py-12 sm:py-16 md:py-20 bg-secondary/20">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-4 sm:mb-6">Why Hire Me For Your Next Project?</h2>
+                <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
+                  You're not only getting a developer who can deliver, but also someone who thinks about long-term usability, performance, and your business goals.
+                </p>
+                <div className="space-y-3 sm:space-y-4 md:space-y-6">
+                  {skills.map((skill) => (
+                    <div key={skill.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                      <div className="text-sm sm:text-base md:text-lg font-semibold text-foreground min-w-[80px] sm:min-w-[100px]">{skill.name}</div>
+                      <div className="flex-1 h-2 bg-gray-200 rounded-full dark:bg-gray-700">
+                        <div
+                          className="h-2 bg-purple-600 rounded-full"
+                          style={{ width: `${skill.proficiency}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-sm sm:text-base md:text-lg font-semibold text-purple-600 dark:text-purple-400 min-w-[40px] text-right">{skill.proficiency}%</div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6"
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                viewport={{ once: true }}
+              >
+                {[
+                  { number: projects.length, label: "Projects Completed" },
+                  { number: experience.length, label: "Years Experience" },
+                  { number: testimonials.length, label: "Client Satisfaction" },
+                  { number: "24/7", label: "Support Available" }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.05, rotateY: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="bg-card/50 border-border hover:border-purple-500/50 p-3 sm:p-4 md:p-6 text-center backdrop-blur-sm transition-all duration-300 group">
+                      <motion.div 
+                        className="text-xl sm:text-2xl md:text-3xl text-purple-600 dark:text-purple-400 mb-1 sm:mb-2"
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        transition={{ duration: 0.5, delay: index * 0.1, type: "spring", stiffness: 300 }}
+                        viewport={{ once: true }}
+                      >
+                        {stat.number}
+                      </motion.div>
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground group-hover:text-foreground transition-colors leading-tight">{stat.label}</p>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </section>
+        )}
+
+         {/* Projects Section */}
+         {projects.length > 0 && (
+        <section id="projects" className="py-12 sm:py-16 md:py-20 bg-secondary/20">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+            <motion.div 
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 sm:mb-12 md:mb-16"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <div>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4">Let's Have A Look At My Projects</h2>
+                <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">
+                  Have a look at some of the projects I've worked on.
+                </p>
+              </div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button 
+                  className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 border-none shadow-lg text-white text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                  asChild
+                >
+                  <a href="/projects">View All Projects</a>
+                </Button>
+              </motion.div>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+              {projects.slice(0, 5).map((project, index) => {
+                const isExpanded = expandedProjects.has(project.id);
+                const descriptionLength = project.description?.length || 0;
+                const shouldShowExpandButton = descriptionLength > 120;
+                
+                return (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                  className="h-fit"
+                >
+                  <Card className="bg-card/50 border-border rounded-lg hover:border-purple-500/50 overflow-hidden group backdrop-blur-sm transition-all duration-300 h-full p-0">
+                    {project.image && (
+                      <div className="aspect-[2/3] overflow-hidden relative">
+                        <motion.img
+                          src={project.image}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-500"
+                          whileHover={{ scale: 1.05 }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                    )}
+                      <CardContent className="p-4 sm:p-6 font-raleway flex flex-col h-full">
+                      {project.tags && (
+                        <motion.div 
+                          className="flex flex-wrap gap-2 mb-3 sm:mb-4"
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          transition={{ duration: 0.5, delay: 0.2 }}
+                          viewport={{ once: true }}
+                        >
+                          {project.tags.map((tag: string, tagIndex: number) => (
+                            <motion.div
+                              key={tag}
+                              initial={{ scale: 0 }}
+                              whileInView={{ scale: 1 }}
+                              transition={{ duration: 0.3, delay: tagIndex * 0.1 }}
+                              viewport={{ once: true }}
+                            >
+                              <Badge variant="secondary" className="text-xs bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/30 transition-colors">
+                                {tag}
+                              </Badge>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                      <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+                        <h3 className="text-lg sm:text-xl text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors leading-tight">{project.title}</h3>
+                        {project.url && (
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 45 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <Button size="sm" variant="outline" className="p-2 border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:border-purple-400" asChild>
+                              <a href={project.url} target="_blank" rel="noopener noreferrer">
+                                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600 dark:text-purple-400" />
+                              </a>
+                            </Button>
+                          </motion.div>
+                        )}
+                      </div>
+                        
+                        {/* Description with fixed height and expandable functionality */}
+                        <div className="flex-1 flex flex-col">
+                          <div 
+                            className={`text-sm sm:text-base text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed expandable-content ${
+                              !isExpanded && shouldShowExpandButton ? 'line-clamp-3' : ''
+                            }`}
+                            style={{
+                              minHeight: shouldShowExpandButton ? '4.5rem' : 'auto',
+                              maxHeight: !isExpanded && shouldShowExpandButton ? '4.5rem' : 'none',
+                              overflow: !isExpanded && shouldShowExpandButton ? 'hidden' : 'visible'
+                            }}
+                          >
+                            {project.description}
+                      </div>
+                          
+                          {/* Expand/Collapse Button */}
+                          {shouldShowExpandButton && (
+                <motion.button
+                              onClick={() => toggleProjectExpansion(project.id)}
+                              className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1 self-start"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {isExpanded ? (
+                                <>
+                                  <span>Show Less</span>
+                                  <ChevronUp className="w-3 h-3" />
+                                </>
+                              ) : (
+                                <>
+                                  <span>Read More</span>
+                                  <ChevronDown className="w-3 h-3" />
+                                </>
+                              )}
+                </motion.button>
+                          )}
+            </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+        )}
+
+        {/* Certifications Section */}
         {(experience.length > 0 || education.length > 0) && (
-        <section id="experience-education" className="py-12 sm:py-16 md:py-20 bg-background">
+        <section id="certifications" className="py-12 sm:py-16 md:py-20 bg-background">
           <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
             <motion.div 
               className="text-center mb-8 sm:mb-12 md:mb-16"
@@ -678,75 +887,6 @@ const Home: React.FC = () => {
         </section>
       )}
 
-      {/* Skills Section */}
-      {skills.length > 0 && (
-        <section id="skills" className="py-12 sm:py-16 md:py-20 bg-secondary/20">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-4 sm:mb-6">Why Hire Me For Your Next Project?</h2>
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-                  You're not only getting a developer who can deliver, but also someone who thinks about long-term usability, performance, and your business goals.
-                </p>
-                <div className="space-y-3 sm:space-y-4 md:space-y-6">
-                  {skills.map((skill) => (
-                    <div key={skill.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                      <div className="text-sm sm:text-base md:text-lg font-semibold text-foreground min-w-[80px] sm:min-w-[100px]">{skill.name}</div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full dark:bg-gray-700">
-                        <div
-                          className="h-2 bg-purple-600 rounded-full"
-                          style={{ width: `${skill.proficiency}%` }}
-                        ></div>
-                      </div>
-                      <div className="text-sm sm:text-base md:text-lg font-semibold text-purple-600 dark:text-purple-400 min-w-[40px] text-right">{skill.proficiency}%</div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6"
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                viewport={{ once: true }}
-              >
-                {[
-                  { number: projects.length, label: "Projects Completed" },
-                  { number: experience.length, label: "Years Experience" },
-                  { number: testimonials.length, label: "Client Satisfaction" },
-                  { number: "24/7", label: "Support Available" }
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.05, rotateY: 10 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Card className="bg-card/50 border-border hover:border-purple-500/50 p-3 sm:p-4 md:p-6 text-center backdrop-blur-sm transition-all duration-300 group">
-                      <motion.div 
-                        className="text-xl sm:text-2xl md:text-3xl text-purple-600 dark:text-purple-400 mb-1 sm:mb-2"
-                        initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        transition={{ duration: 0.5, delay: index * 0.1, type: "spring", stiffness: 300 }}
-                        viewport={{ once: true }}
-                      >
-                        {stat.number}
-                      </motion.div>
-                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground group-hover:text-foreground transition-colors leading-tight">{stat.label}</p>
-                    </Card>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </div>
-        </section>
-        )}
-
         {/* Testimonials Section */}
         {testimonials.length > 0 && (
         <section id="testimonials"    className="py-16 sm:py-20 bg-background">
@@ -764,10 +904,24 @@ const Home: React.FC = () => {
               </p>
             </motion.div>
             
-            <div className="relative">
+            <div className="relative touch-pan-y">
             <Swiper
               spaceBetween={24}
               slidesPerView={1}
+              allowTouchMove={true}
+              touchRatio={1}
+              touchAngle={45}
+              threshold={5}
+              touchStartPreventDefault={false}
+              touchMoveStopPropagation={false}
+              simulateTouch={true}
+              grabCursor={true}
+              autoplay={{
+                delay: 2000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+              }}
+              loop={true}
               breakpoints={{
                 640: { slidesPerView: 1 },
                 768: { slidesPerView: 2 },
@@ -776,6 +930,7 @@ const Home: React.FC = () => {
               modules={[Navigation, Pagination]}
               navigation={{
                 prevEl: testimonialsPrevRef.current,
+                enabled: true,
                 nextEl: testimonialsNextRef.current,
               }}
               onBeforeInit={(swiper) => {
@@ -785,8 +940,20 @@ const Home: React.FC = () => {
                   navigation.nextEl = testimonialsNextRef.current;
                 }
               }}
-              pagination={{ clickable: true }}
-                className="pb-12"
+              onTouchStart={(_, event) => {
+                // Prevent conflicts with other touch interactions
+                event.stopPropagation();
+              }}
+              onTouchMove={(_, event) => {
+                // Allow smooth touch movement
+                event.stopPropagation();
+              }}
+              pagination={{ 
+                clickable: true,
+                dynamicBullets: true,
+                dynamicMainBullets: 3
+              }}
+              className="pb-12"
             >
                 {testimonials.map((testimonial, index) => {
                   const isExpanded = expandedTestimonials.has(testimonial.id);
@@ -800,10 +967,9 @@ const Home: React.FC = () => {
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
                       viewport={{ once: true }}
-                      whileHover={{ y: -5 }}
                       className="h-full"
                     >
-                        <Card className="bg-card/50 border-border hover:border-purple-500/50 p-4 sm:p-6 h-full backdrop-blur-sm transition-all duration-300 group flex flex-col">
+                        <Card className="bg-card/50 border-border hover:border-purple-500/50 mt-2 p-4 sm:p-6 h-full backdrop-blur-sm transition-all duration-300 group flex flex-col">
                         <div className="flex">
                         {renderStars(Math.round(testimonial.rating ?? 0))}
                           <span className="ml-2 text-muted-foreground">{Number(testimonial.rating ?? 0).toFixed(1)}</span>
@@ -891,151 +1057,6 @@ const Home: React.FC = () => {
                   →
                 </motion.button>
             </div>
-            </div>
-          </div>
-        </section>
-        )}
-
-        {/* Projects Section */}
-        {projects.length > 0 && (
-        <section id="projects" className="py-12 sm:py-16 md:py-20 bg-secondary/20">
-          <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-            <motion.div 
-              className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 sm:mb-12 md:mb-16"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl text-foreground mb-3 sm:mb-4">Let's Have A Look At My Projects</h2>
-                <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl">
-                  Have a look at some of the projects I've worked on.
-                </p>
-              </div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button 
-                  className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 border-none shadow-lg text-white text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                  asChild
-                >
-                  <a href="/projects">View All Projects</a>
-                </Button>
-              </motion.div>
-            </motion.div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {projects.slice(0, 5).map((project, index) => {
-                const isExpanded = expandedProjects.has(project.id);
-                const descriptionLength = project.description?.length || 0;
-                const shouldShowExpandButton = descriptionLength > 120;
-                
-                return (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -5 }}
-                  className="h-fit"
-                >
-                  <Card className="bg-card/50 border-border rounded-lg hover:border-purple-500/50 overflow-hidden group backdrop-blur-sm transition-all duration-300 h-full p-0">
-                    {project.image && (
-                      <div className="aspect-[2/3] overflow-hidden relative">
-                        <motion.img
-                          src={project.image}
-                          alt={project.title}
-                          className="w-full h-full object-cover transition-transform duration-500"
-                          whileHover={{ scale: 1.05 }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-                    )}
-                      <CardContent className="p-4 sm:p-6 font-raleway flex flex-col h-full">
-                      {project.tags && (
-                        <motion.div 
-                          className="flex flex-wrap gap-2 mb-3 sm:mb-4"
-                          initial={{ opacity: 0 }}
-                          whileInView={{ opacity: 1 }}
-                          transition={{ duration: 0.5, delay: 0.2 }}
-                          viewport={{ once: true }}
-                        >
-                          {project.tags.map((tag: string, tagIndex: number) => (
-                            <motion.div
-                              key={tag}
-                              initial={{ scale: 0 }}
-                              whileInView={{ scale: 1 }}
-                              transition={{ duration: 0.3, delay: tagIndex * 0.1 }}
-                              viewport={{ once: true }}
-                            >
-                              <Badge variant="secondary" className="text-xs bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/30 transition-colors">
-                                {tag}
-                              </Badge>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      )}
-                      <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-                        <h3 className="text-lg sm:text-xl text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors leading-tight">{project.title}</h3>
-                        {project.url && (
-                          <motion.div
-                            whileHover={{ scale: 1.1, rotate: 45 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Button size="sm" variant="outline" className="p-2 border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:border-purple-400" asChild>
-                              <a href={project.url} target="_blank" rel="noopener noreferrer">
-                                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600 dark:text-purple-400" />
-                              </a>
-                            </Button>
-                          </motion.div>
-                        )}
-                      </div>
-                        
-                        {/* Description with fixed height and expandable functionality */}
-                        <div className="flex-1 flex flex-col">
-                          <div 
-                            className={`text-sm sm:text-base text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed expandable-content ${
-                              !isExpanded && shouldShowExpandButton ? 'line-clamp-3' : ''
-                            }`}
-                            style={{
-                              minHeight: shouldShowExpandButton ? '4.5rem' : 'auto',
-                              maxHeight: !isExpanded && shouldShowExpandButton ? '4.5rem' : 'none',
-                              overflow: !isExpanded && shouldShowExpandButton ? 'hidden' : 'visible'
-                            }}
-                          >
-                            {project.description}
-                      </div>
-                          
-                          {/* Expand/Collapse Button */}
-                          {shouldShowExpandButton && (
-                <motion.button
-                              onClick={() => toggleProjectExpansion(project.id)}
-                              className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1 self-start"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              {isExpanded ? (
-                                <>
-                                  <span>Show Less</span>
-                                  <ChevronUp className="w-3 h-3" />
-                                </>
-                              ) : (
-                                <>
-                                  <span>Read More</span>
-                                  <ChevronDown className="w-3 h-3" />
-                                </>
-                              )}
-                </motion.button>
-                          )}
-            </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
             </div>
           </div>
         </section>

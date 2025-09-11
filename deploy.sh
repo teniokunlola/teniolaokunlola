@@ -20,8 +20,8 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}❌ Docker Compose is not installed. Please install Docker Compose first.${NC}"
+if ! command -v docker &> /dev/null || ! docker compose version &> /dev/null; then
+    echo -e "${RED}❌ Docker Compose plugin is not installed. Please install Docker Compose first.${NC}"
     exit 1
 fi
 
@@ -44,17 +44,17 @@ export $(cat backend/.env.production | grep -v '^#' | xargs)
 # Build frontend
 echo -e "${YELLOW}Building frontend...${NC}"
 cd frontend
-npm ci --only=production
+npm ci
 npm run build
 cd ..
 
 # Stop existing containers
 echo -e "${YELLOW}Stopping existing containers...${NC}"
-docker-compose -f docker-compose.prod.yml down --remove-orphans || true
+docker compose -f docker-compose.prod.yml down --remove-orphans || true
 
 # Build and start containers
 echo -e "${YELLOW}Building and starting production containers...${NC}"
-docker-compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml up --build -d
 
 # Wait for services to be ready
 echo -e "${YELLOW}Waiting for services to be ready...${NC}"
@@ -62,11 +62,11 @@ sleep 30
 
 # Run database migrations
 echo -e "${YELLOW}Running database migrations...${NC}"
-docker-compose -f docker-compose.prod.yml exec backend-prod python manage.py migrate
+docker compose -f docker-compose.prod.yml exec backend-prod python manage.py migrate
 
 # Collect static files
 echo -e "${YELLOW}Collecting static files...${NC}"
-docker-compose -f docker-compose.prod.yml exec backend-prod python manage.py collectstatic --noinput
+docker compose -f docker-compose.prod.yml exec backend-prod python manage.py collectstatic --noinput
 
 # Check service health
 echo -e "${YELLOW}Checking service health...${NC}"
@@ -74,7 +74,7 @@ if curl -f http://localhost/api/health/ > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Backend health check passed${NC}"
 else
     echo -e "${RED}❌ Backend health check failed${NC}"
-    docker-compose -f docker-compose.prod.yml logs backend-prod
+    docker compose -f docker-compose.prod.yml logs backend-prod
     exit 1
 fi
 
@@ -82,13 +82,13 @@ if curl -f http://localhost/ > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Frontend health check passed${NC}"
 else
     echo -e "${RED}❌ Frontend health check failed${NC}"
-    docker-compose -f docker-compose.prod.yml logs nginx
+    docker compose -f docker-compose.prod.yml logs nginx
     exit 1
 fi
 
 # Show running containers
 echo -e "${YELLOW}Running containers:${NC}"
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 echo -e "\n${GREEN}🎉 Deployment completed successfully!${NC}"
 echo -e "${BLUE}Application is now running at:${NC}"
@@ -97,7 +97,7 @@ echo -e "  API: https://api.teniolaokunlola.com"
 echo -e "  Admin: https://admin.teniolaokunlola.com"
 
 echo -e "\n${YELLOW}To view logs:${NC}"
-echo -e "  docker-compose -f docker-compose.prod.yml logs -f"
+echo -e "  docker compose -f docker-compose.prod.yml logs -f"
 
 echo -e "\n${YELLOW}To stop the application:${NC}"
-echo -e "  docker-compose -f docker-compose.prod.yml down"
+echo -e "  docker compose -f docker-compose.prod.yml down"

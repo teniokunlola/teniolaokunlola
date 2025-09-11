@@ -27,6 +27,7 @@ export interface Project {
   description: string;
   image?: string;
   url?: string;
+  tags?: string[];
   created_at?: string;
   updated_at?: string;
 }

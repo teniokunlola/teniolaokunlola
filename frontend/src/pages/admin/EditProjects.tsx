@@ -1,11 +1,8 @@
 import React from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminAPI, { type Project } from '@/api/adminAPI';
-import { buildApiUrl } from '@/api/config';
-import { authFetch } from '@/api/authFetch';
 import { logger } from '@/lib/logger';
 import { getErrorMessage } from '@/types/errors';
-
 import ImageUpload from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { 
@@ -42,6 +39,7 @@ const EditProjects: React.FC = () => {
   const [editing, setEditing] = React.useState<Project | null>(null);
   const [form, setForm] = React.useState<Partial<Project>>({ title: '', description: '', image: '', url: '' });
   const [saving, setSaving] = React.useState(false);
+  const [tagsInput, setTagsInput] = React.useState<string>('');
   const [deletingId, setDeletingId] = React.useState<number | null>(null);
   const [showForm, setShowForm] = React.useState(false);
   const [urlError, setUrlError] = React.useState<string | null>(null);
@@ -69,6 +67,7 @@ const EditProjects: React.FC = () => {
   const handleEdit = (project: Project) => {
     setEditing(project);
     setForm({ ...project });
+    setTagsInput(project.tags && Array.isArray(project.tags) ? project.tags.join(', ') : '');
     setShowForm(true);
     setUrlError(null);
   };
@@ -76,6 +75,7 @@ const EditProjects: React.FC = () => {
   const handleAdd = () => {
     setEditing(null);
     setForm({ title: '', description: '', image: '', url: '' });
+    setTagsInput('');
     setShowForm(true);
     setUrlError(null);
   };
@@ -162,6 +162,12 @@ const EditProjects: React.FC = () => {
       formData.append('title', titleValidation.value);
       formData.append('description', descriptionValidation.value);
       if (form.url) formData.append('url', validateAndSanitizeUrl(form.url).value);
+      // Parse tags input (comma-separated) into array and include as JSON
+      const parsedTags = tagsInput
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+      formData.append('tags', JSON.stringify(parsedTags));
       if (imageFile) {
         formData.append('image', imageFile);
       } else if (form.image && typeof form.image === 'string' && form.image.trim() !== '') {
@@ -183,6 +189,7 @@ const EditProjects: React.FC = () => {
       fetchProjects();
       setEditing(null);
       setForm({ title: '', description: '', image: '', url: '' });
+      setTagsInput('');
       setShowForm(false);
       setImageFile(null);
     } catch (err) {
@@ -225,6 +232,7 @@ const EditProjects: React.FC = () => {
   const handleCancel = () => {
     setEditing(null);
     setForm({ title: '', description: '', image: '', url: '' });
+    setTagsInput('');
     setShowForm(false);
     setImageFile(null);
     setUrlError(null);
@@ -343,6 +351,20 @@ const EditProjects: React.FC = () => {
                 />
             </div>
 
+            <div className="space-y-2">
+              <label htmlFor="tags" className="text-sm font-medium text-foreground">
+                Tags (comma-separated)
+              </label>
+              <Input
+                id="tags"
+                name="tags"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                placeholder="e.g. react, django, portfolio"
+                className="admin-form-input"
+              />
+            </div>
+
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-500/20">
               <AdminActionButton
                 variant="outline"
@@ -370,7 +392,7 @@ const EditProjects: React.FC = () => {
         </AdminFormSection>
       ) : (
         <AdminDataTable
-          headers={['Project', 'Description', 'Image', 'URL', 'Date', 'Actions']}
+          headers={['Project', 'Description', 'Image', 'Tags', 'URL', 'Date', 'Actions']}
           loading={loading}
           emptyMessage="No projects found. Add your first project to get started."
         >
@@ -412,6 +434,19 @@ const EditProjects: React.FC = () => {
                 ) : (
                   <AdminStatusBadge status="warning">No Image</AdminStatusBadge>
                 )}
+              </td>
+              <td className="py-3 px-4">
+                <div className="flex flex-wrap gap-2 max-w-xs">
+                  {Array.isArray(project.tags) && project.tags.length > 0 ? (
+                    project.tags.map((tag) => (
+                      <span key={tag} className="text-xs px-2 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        {tag}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">—</span>
+                  )}
+                </div>
               </td>
               <td className="py-3 px-4">
                 {project.url ? (

@@ -98,13 +98,15 @@ const Footer: React.FC = () => {
                 <Mail className="h-4 w-4 text-purple-400" />
                 <a href={`mailto:${settings.site_email || 'teniolaokunlola@proton.me'}`} target="_blank" rel="noopener noreferrer" className="text-sm font-raleway ">{settings.site_email || 'teniolaokunlola@proton.me'}</a>
               </div>
+
               <div className="flex items-center space-x-3 text-muted-foreground">
                 <Phone className="h-4 w-4 text-purple-400" />
                 <a href={`tel:${settings.site_phone || '+234 7019857833'}`} target="_blank" rel="noopener noreferrer" className="text-sm font-raleway ">{settings.site_phone || '+234 7019857833'}</a>
               </div>
+
               <div className="flex items-start space-x-3 text-muted-foreground">
                 <MapPin className="h-4 w-4 text-purple-400 mt-0.5" />
-                <a href={`https://maps.app.goo.gl/1234567890`} target="_blank" rel="noopener noreferrer" className="text-sm font-raleway font-light">
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.site_address || 'Lagos, Nigeria')}`} target="_blank" rel="noopener noreferrer" className="text-sm font-raleway font-light">
                   {settings.site_address || 'Lagos, Nigeria'}
                 </a>
               </div>

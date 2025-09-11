@@ -100,3 +100,36 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     }
   },
 }));
+
+// --- Public About Store ---
+type PublicAbout = {
+  id?: number;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  title?: string;
+  profile_picture?: string;
+  summary?: string;
+  email?: string;
+  phone_number?: string;
+  address?: string;
+  resume?: string;
+};
+
+type AboutState = {
+  about: PublicAbout;
+  fetchAbout: () => Promise<void>;
+};
+
+export const useAboutStore = create<AboutState>((set) => ({
+  about: {},
+  fetchAbout: async () => {
+    try {
+      const data = await PublicAPI.about.list();
+      const aboutObj: PublicAbout = (Array.isArray(data) ? data[0] : data) || {};
+      set({ about: aboutObj });
+    } catch {
+      set({ about: {} });
+    }
+  },
+}));
