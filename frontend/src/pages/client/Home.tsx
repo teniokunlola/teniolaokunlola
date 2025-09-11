@@ -47,6 +47,8 @@ const Home: React.FC = () => {
   const [contactError, setContactError] = React.useState<string | null>(null);
   const [expandedProjects, setExpandedProjects] = React.useState<Set<number>>(new Set());
   const [expandedTestimonials, setExpandedTestimonials] = React.useState<Set<number>>(new Set());
+  const [expandedServices, setExpandedServices] = React.useState<Set<number>>(new Set());
+  const [expandedExperienceItems, setExpandedExperienceItems] = React.useState<Set<number>>(new Set());
   
   // Rate limiting for contact form
   const rateLimiter = React.useMemo(() => new RateLimiter(3, 60000), []); // 3 attempts per minute
@@ -80,6 +82,32 @@ const Home: React.FC = () => {
         newSet.delete(testimonialId);
       } else {
         newSet.add(testimonialId);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle service expansion
+  const toggleServiceExpansion = (serviceId: number) => {
+    setExpandedServices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(serviceId)) {
+        newSet.delete(serviceId);
+      } else {
+        newSet.add(serviceId);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle experience description expansion
+  const toggleExperienceExpansion = (experienceId: number) => {
+    setExpandedExperienceItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(experienceId)) {
+        newSet.delete(experienceId);
+      } else {
+        newSet.add(experienceId);
       }
       return newSet;
     });
@@ -377,8 +405,10 @@ const Home: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <a href={`mailto:${about.email}`} className='hidden sm:inline' target="_blank" rel="noopener noreferrer">{about.email}</a>
-                    <span className="sm:hidden">Email</span>
+                    <a href={`mailto:${about.email}`} target="_blank" rel="noopener noreferrer">
+                      <span className="sm:hidden">Email</span>
+                      <span className="hidden sm:inline">{about.email}</span>
+                    </a>
                   </motion.div>
                 )}
                 {about?.phone_number && (
@@ -387,8 +417,10 @@ const Home: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <a href={`tel:${about.phone_number}`} className='hidden sm:inline' target="_blank" rel="noopener noreferrer">{about.phone_number}</a>
-                    <span className="sm:hidden">Phone</span>
+                    <a href={`tel:${about.phone_number}`} target="_blank" rel="noopener noreferrer">
+                      <span className="sm:hidden">Phone</span>
+                      <span className="hidden sm:inline">{about.phone_number}</span>
+                    </a>
                   </motion.div>
                 )}
                 {about?.address && (
@@ -397,8 +429,10 @@ const Home: React.FC = () => {
                     whileHover={{ scale: 1.05 }}
                   >
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(about.address)}`} className='hidden sm:inline' target="_blank" rel="noopener noreferrer">{about.address}</a>
-                    <span className="sm:hidden">Location</span>
+                    <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(about.address)}`} target="_blank" rel="noopener noreferrer">
+                      <span className="sm:hidden">Location</span>
+                      <span className="hidden sm:inline">{about.address}</span>
+                    </a>
                   </motion.div>
                 )}
               </motion.div>
@@ -499,7 +533,45 @@ const Home: React.FC = () => {
                         {index + 1}
                       </motion.div>
                       <h3 className="text-lg sm:text-xl text-foreground mb-2 sm:mb-4">{service.name}</h3>
-                      <p className="text-sm sm:text-base text-muted-foreground text-wrap leading-relaxed">{service.description}</p>
+                      {(() => {
+                        const isExpanded = expandedServices.has(service.id);
+                        const descriptionLength = service.description?.length || 0;
+                        const shouldShowExpandButton = descriptionLength > 160;
+                        return (
+                          <div className="flex flex-col">
+                            <p
+                              className={`text-sm sm:text-base text-muted-foreground text-wrap leading-relaxed ${!isExpanded && shouldShowExpandButton ? 'line-clamp-3' : ''}`}
+                              style={{
+                                minHeight: shouldShowExpandButton ? '4.5rem' : 'auto',
+                                maxHeight: !isExpanded && shouldShowExpandButton ? '4.5rem' : 'none',
+                                overflow: !isExpanded && shouldShowExpandButton ? 'hidden' : 'visible'
+                              }}
+                            >
+                              {service.description}
+                            </p>
+                            {shouldShowExpandButton && (
+                              <motion.button
+                                onClick={() => toggleServiceExpansion(service.id)}
+                                className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1 self-start"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUp className="w-3 h-3" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>Read More</span>
+                                    <ChevronDown className="w-3 h-3" />
+                                  </>
+                                )}
+                              </motion.button>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
@@ -792,7 +864,45 @@ const Home: React.FC = () => {
                               </span>
                       </div>
                             <p className="text-sm sm:text-base text-purple-600 dark:text-purple-400 font-medium">{exp.company}</p>
-                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{exp.description}</p>
+                            {(() => {
+                              const isExpanded = expandedExperienceItems.has(exp.id);
+                              const descriptionLength = exp.description?.length || 0;
+                              const shouldShowExpandButton = descriptionLength > 160;
+                              return (
+                                <div className="flex flex-col">
+                                  <p
+                                    className={`text-xs sm:text-sm text-muted-foreground leading-relaxed ${!isExpanded && shouldShowExpandButton ? 'line-clamp-3' : ''}`}
+                                    style={{
+                                      minHeight: shouldShowExpandButton ? '4.5rem' : 'auto',
+                                      maxHeight: !isExpanded && shouldShowExpandButton ? '4.5rem' : 'none',
+                                      overflow: !isExpanded && shouldShowExpandButton ? 'hidden' : 'visible'
+                                    }}
+                                  >
+                                    {exp.description}
+                                  </p>
+                                  {shouldShowExpandButton && (
+                                    <motion.button
+                                      onClick={() => toggleExperienceExpansion(exp.id)}
+                                      className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1 self-start"
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                    >
+                                      {isExpanded ? (
+                                        <>
+                                          <span>Show Less</span>
+                                          <ChevronUp className="w-3 h-3" />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span>Read More</span>
+                                          <ChevronDown className="w-3 h-3" />
+                                        </>
+                                      )}
+                                    </motion.button>
+                                  )}
+                                </div>
+                              );
+                            })()}
                     </div>
                 </motion.div>
               ))}
