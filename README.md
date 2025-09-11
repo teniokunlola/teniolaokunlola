@@ -1,6 +1,6 @@
-# Teniola Portfolio Site
+# Teniola Okunlola - Portfolio Site
 
-A full-stack portfolio website built with Django REST Framework backend and React + Vite frontend.
+A dynamic full-stack portfolio web application built with Python Django REST Framework backend and React + Vite frontend utilising modern web technologies and languages; TailwindCSS, Typescript, and newer UI components (Shadcn, Lucide React, among others).
 
 ## 🚀 Quick Start
 
@@ -13,9 +13,9 @@ A full-stack portfolio website built with Django REST Framework backend and Reac
 
 1. **Clone and setup the project:**
    ```bash
-   cd /path/to/your/projects
-   git clone <your-repo-url> teniola-site
-   cd teniola-site
+   cd teniolaokunlola
+   git clone https://github.com/teniokunlola/teniolaokunlola
+   cd teniolaokunlola
    make setup
    ```
 
@@ -90,7 +90,6 @@ npm run dev
   - Admin panel with custom roles
   - Portfolio management API
   - Contact form handling
-  - Blog management
 
 - **Frontend (React + Vite):**
   - Modern React with TypeScript
@@ -103,7 +102,7 @@ npm run dev
 ## 🔐 Environment Configuration
 
 ### Backend (.env)
-Copy `backend/.env.example` to `backend/.env` and configure:
+Configure `backend/.env.development` or `backend/.env.production` and configure. For example:
 ```bash
 SECRET_KEY=your-django-secret-key
 DEBUG=True
@@ -111,7 +110,7 @@ FIREBASE_SERVICE_ACCOUNT_KEY_PATH=core/firebase_service_account.json
 ```
 
 ### Frontend (.env)
-Copy `frontend/.env.example` to `frontend/.env` and configure:
+Copy `frontend/.env.development` to `frontend/.env.production` and configure:
 ```bash
 VITE_API_BASE_URL=http://localhost:8000/api
 VITE_FIREBASE_API_KEY=your-firebase-api-key
@@ -154,7 +153,7 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 
 ## 🏗️ macOS-Specific Optimizations
 
-This project is optimized for macOS development with:
+This project is optimised for macOS development with:
 - Proper `.gitignore` files for macOS-specific files (`.DS_Store`, etc.)
 - Virtual environment with correct Unix structure
 - Homebrew-compatible Python and Node.js versions
@@ -185,4 +184,4 @@ This project is optimized for macOS development with:
 
 ## 📄 License
 
-Private project for Teniola's portfolio.
+Private project for Teniola Okunlola's portfolio.
