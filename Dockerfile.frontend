@@ -7,11 +7,7 @@ WORKDIR /app
 # Copy package files
 COPY frontend/package*.json ./
 
-<<<<<<< HEAD
-# Install dependencies (include devDependencies for build tools like Vite/TypeScript)
-=======
 # Install dependencies (include devDependencies for build tools)
->>>>>>> 2d11b6de ((Server)Revisited & Changed Certain Files - Frontend & Backend)
 RUN npm ci
 
 # Copy source code
