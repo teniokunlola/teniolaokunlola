@@ -2,12 +2,10 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from '@/context/AuthContext';
 import { Toaster } from 'sonner';
-// import Loading from './pages/Loading';
+import ProtectedRoute from './routes/ProtectedRoute';
+// Admin-Side Pages
 import SignupWithInvite from './pages/admin/SignupWithInvite';
 import Login from './pages/admin/Login';
-
-import ProtectedRoute from './routes/ProtectedRoute';
-
 import AdminInvitations from './pages/admin/AdminInvitations';
 import Dashboard from './pages/admin/Dashboard';
 import Analytics from './pages/admin/Analytics';
@@ -23,15 +21,10 @@ import EditSkills from './pages/admin/EditSkills';
 import AdminUsers from './pages/admin/AdminUsers';
 import EditAbout from './pages/admin/EditAbout';
 
-
-import About from './pages/client/About';
-import Contact from './pages/client/Contact';
+// Admin-Side Pages
 import Home from './pages/client/Home';
-import Projects from './pages/client/Projects';
-import Testimonials from './pages/client/Testimonials';
-import Education from './pages/client/Education';
-import Experience from './pages/client/Experience';
 
+import NotFound from './pages/NotFound';
 
 const App: React.FC = () => (
   <Router>
@@ -40,20 +33,9 @@ const App: React.FC = () => (
         <Routes>
           {/* Loading Route */}
           {/* <Route path="/loading" element={<Loading />} /> */}
-          {/* About Route */}
-          <Route path="/about" element={<About />} />
-          {/* Contact Route */}
-          <Route path="/contact" element={<Contact />} />
           {/* Home Route */}
           <Route path="/" element={<Home />} />
-          {/* Projects Route */}
-          <Route path="/projects" element={<Projects />} />
-          {/* Education Route */}
-          <Route path="/education" element={<Education />} />
-          {/* Experience Route */}
-          <Route path="/experience" element={<Experience />} />
-          {/* Testimonials Route */}
-          <Route path="/testimonials" element={<Testimonials />} />
+          {/* Download links are handled by server-side /download/:filename proxy */}
 
           {/* Invitation Signup Route */}
           <Route path="/admin/signup" element={<SignupWithInvite />} />
@@ -185,6 +167,8 @@ const App: React.FC = () => (
               </ProtectedRoute>
             }
           />
+          {/* Catch-all 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         {/* Toast Notifications */}

@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Mail, Download, Sun, Moon, Sparkles, Star, ArrowRight, Phone, MapPin, ChevronDown, ChevronUp, GraduationCap, Briefcase } from 'lucide-react';
+
 import PublicAPI, {
   type PublicAbout,
   type PublicProject,
@@ -49,6 +50,7 @@ const Home: React.FC = () => {
   const [expandedTestimonials, setExpandedTestimonials] = React.useState<Set<number>>(new Set());
   const [expandedServices, setExpandedServices] = React.useState<Set<number>>(new Set());
   const [expandedExperienceItems, setExpandedExperienceItems] = React.useState<Set<number>>(new Set());
+  const [showAllProjects, setShowAllProjects] = React.useState(false);
   
   // Rate limiting for contact form
   const rateLimiter = React.useMemo(() => new RateLimiter(3, 60000), []); // 3 attempts per minute
@@ -384,8 +386,7 @@ const Home: React.FC = () => {
                   >
                     <Button variant="outline" size="lg" className="w-full sm:w-auto border-purple-500 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4" asChild>
                       <a href={about.resume} target="_blank" rel="noopener noreferrer">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download CV
+                        <Download className="w-4 h-4 mr-2" />Download CV
                       </a>
                     </Button>
                   </motion.div>
@@ -406,7 +407,7 @@ const Home: React.FC = () => {
                   >
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                     <a href={`mailto:${about.email}`} target="_blank" rel="noopener noreferrer">
-                      <span className="sm:hidden">Email</span>
+                    <span className="sm:hidden">Email</span>
                       <span className="hidden sm:inline">{about.email}</span>
                     </a>
                   </motion.div>
@@ -418,7 +419,7 @@ const Home: React.FC = () => {
                   >
                     <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                     <a href={`tel:${about.phone_number}`} target="_blank" rel="noopener noreferrer">
-                      <span className="sm:hidden">Phone</span>
+                    <span className="sm:hidden">Phone</span>
                       <span className="hidden sm:inline">{about.phone_number}</span>
                     </a>
                   </motion.div>
@@ -430,7 +431,7 @@ const Home: React.FC = () => {
                   >
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                     <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(about.address)}`} target="_blank" rel="noopener noreferrer">
-                      <span className="sm:hidden">Location</span>
+                    <span className="sm:hidden">Location</span>
                       <span className="hidden sm:inline">{about.address}</span>
                     </a>
                   </motion.div>
@@ -682,21 +683,23 @@ const Home: React.FC = () => {
                   Have a look at some of the projects I've worked on.
                 </p>
               </div>
+              {projects.length > 6 && (
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button 
                   className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 border-none shadow-lg text-white text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                  asChild
+                    onClick={() => setShowAllProjects(prev => !prev)}
                 >
-                  <a href="/projects">View All Projects</a>
+                    {showAllProjects ? 'Show Less' : 'Show All Projects'}
                 </Button>
               </motion.div>
+              )}
             </motion.div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {projects.slice(0, 5).map((project, index) => {
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 ${showAllProjects && projects.length > 10 ? 'max-h-[70vh] overflow-y-auto pr-1' : ''}`}>
+              {(showAllProjects ? projects : projects.slice(0, 6)).map((project, index) => {
                 const isExpanded = expandedProjects.has(project.id);
                 const descriptionLength = project.description?.length || 0;
                 const shouldShowExpandButton = descriptionLength > 120;
@@ -967,8 +970,7 @@ const Home: React.FC = () => {
                                 className="mt-2 text-xs border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
                                 asChild
                               >
-                            <a href={(edu.certificate || edu.url)!} target="_blank" rel="noopener noreferrer">
-                              View Certificate
+                            <a href={edu.certificate || edu.url} target="_blank" rel="noopener noreferrer">View Certificate
                             </a>
                           </Button>
                         )}
