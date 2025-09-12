@@ -57,6 +57,8 @@ const Home: React.FC = () => {
 
   const testimonialsPrevRef = React.useRef<HTMLButtonElement>(null);
   const testimonialsNextRef = React.useRef<HTMLButtonElement>(null);
+  const servicesPrevRef = React.useRef<HTMLButtonElement>(null);
+  const servicesNextRef = React.useRef<HTMLButtonElement>(null);
 
   // Theme toggle function
   const toggleTheme = () => {
@@ -510,22 +512,68 @@ const Home: React.FC = () => {
               </p>
             </motion.div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            <div className="relative">
+              <Swiper
+                spaceBetween={16}
+                slidesPerView={1}
+                allowTouchMove={true}
+                touchRatio={1}
+                touchAngle={45}
+                threshold={5}
+                touchStartPreventDefault={true}
+                touchMoveStopPropagation={true}
+                simulateTouch={true}
+                grabCursor={true}
+                loop={false}
+                breakpoints={{
+                  640: { 
+                    slidesPerView: 2,
+                    spaceBetween: 20
+                  },
+                  1024: { 
+                    slidesPerView: 3,
+                    spaceBetween: 24
+                  },
+                  1280: { 
+                    slidesPerView: 4,
+                    spaceBetween: 24
+                  }
+                }}
+                modules={[Navigation, Pagination]}
+                navigation={{
+                  prevEl: servicesPrevRef.current,
+                  enabled: true,
+                  nextEl: servicesNextRef.current,
+                }}
+                onBeforeInit={(swiper) => {
+                  if (swiper.params.navigation && typeof swiper.params.navigation === 'object') {
+                    const navigation = swiper.params.navigation as { prevEl?: HTMLElement | null; nextEl?: HTMLElement | null };
+                    navigation.prevEl = servicesPrevRef.current;
+                    navigation.nextEl = servicesNextRef.current;
+                  }
+                }}
+                pagination={{ 
+                  clickable: true,
+                  dynamicBullets: true,
+                  dynamicMainBullets: 3
+                }}
+                className="pb-12"
+              >
               {services.map((service, index) => (
+                  <SwiperSlide key={service.id}>
                 <motion.div 
-                  key={service.id} 
-                  className="relative group"
+                      className="relative group h-full"
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -10 }}
                 >
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-purple-800/10 dark:from-purple-600/20 dark:to-purple-800/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   />
-                  <Card className="bg-card/80 border-border hover:border-purple-500/50 p-4 sm:p-6 md:p-8 h-full relative z-10 backdrop-blur-sm transition-all duration-300">
-                    <div className="mb-4 sm:mb-6">
+                      <Card className="bg-card/80 border-border hover:border-purple-500/50 p-4 sm:p-6 md:p-8 h-full relative z-10 backdrop-blur-sm transition-all duration-300 flex flex-col">
+                        <div className="mb-4 sm:mb-6 flex-1">
                       <motion.div 
                         className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg flex items-center justify-center text-white text-lg sm:text-xl mb-3 sm:mb-4 shadow-lg"
                         whileHover={{ scale: 1.2, rotate: 360 }}
@@ -577,8 +625,9 @@ const Home: React.FC = () => {
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                          className="mt-auto"
                     >
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto text-purple-600 dark:text-purple-400 border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:border-purple-400 transition-all duration-300 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-3">
+                          <Button variant="outline" size="sm" className="w-full text-purple-600 dark:text-purple-400 border-purple-500/50 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:border-purple-400 transition-all duration-300 text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-3">
                         Learn More
                         <motion.div
                           className="ml-2"
@@ -591,7 +640,31 @@ const Home: React.FC = () => {
                     </motion.div>
                   </Card>
                 </motion.div>
-              ))}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+              
+              {/* Navigation Buttons */}
+              <div className="flex justify-center gap-4 mt-8">
+                <motion.button
+                  ref={servicesPrevRef}
+                  className="w-12 h-12 rounded-full bg-card hover:bg-purple-100 dark:hover:bg-purple-600 flex items-center justify-center transition-all duration-300 border border-border hover:border-purple-500 shadow-md"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Previous Services"
+                >
+                  ←
+                </motion.button>
+                <motion.button
+                  ref={servicesNextRef}
+                  className="w-12 h-12 rounded-full bg-card hover:bg-purple-100 dark:hover:bg-purple-600 flex items-center justify-center transition-all duration-300 border border-border hover:border-purple-500 shadow-md"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Next Services"
+                >
+                  →
+                </motion.button>
+              </div>
             </div>
           </div>
         </section>
@@ -848,8 +921,8 @@ const Home: React.FC = () => {
                       <h3 className="text-xl sm:text-2xl font-bold text-foreground">Work Experience</h3>
                     </div>
                     
-                    <div className="space-y-4">
-                      {experience.slice(0, 4).map((exp, index) => (
+                    <div className={`space-y-4 ${experience.length > 4 ? 'max-h-64 overflow-y-auto pr-2' : ''}`}>
+                      {experience.map((exp, index) => (
                         <motion.div
                           key={exp.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -911,18 +984,8 @@ const Home: React.FC = () => {
               ))}
                     </div>
                     
-                    {experience.length > 6 && (
-                      <div className="mt-6 pt-4 border-t border-border">
-                  <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
-                    asChild
-                  >
-                    <a href="/experience">View All Experience</a>
-                  </Button>
-                </div>
-              )}
+                    
+                    
                   </Card>
                 </motion.div>
       )}
@@ -944,14 +1007,14 @@ const Home: React.FC = () => {
                       <h3 className="text-xl sm:text-2xl font-bold text-foreground">Certifications</h3>
                     </div>
                     
-                    <div className="space-y-4">
-                      {education.slice(0, 4).map((edu, index) => (
-                <motion.div
-                  key={edu.id}
+                    <div className={`space-y-4 ${education.length > 4 ? 'max-h-64 overflow-y-auto pr-2' : ''}`}>
+                      {education.map((edu, index) => (
+                        <motion.div
+                          key={edu.id}
                           initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: index * 0.1 }}
+                          viewport={{ once: true }}
                           className="relative pl-6 border-l-2 border-purple-200 dark:border-purple-800"
                         >
                           <div className="absolute -left-2 top-0 w-4 h-4 bg-purple-500 rounded-full border-2 border-background"></div>
@@ -970,7 +1033,8 @@ const Home: React.FC = () => {
                                 className="mt-2 text-xs border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
                                 asChild
                               >
-                            <a href={edu.certificate || edu.url} target="_blank" rel="noopener noreferrer">View Certificate
+                            <a href={(edu.certificate || edu.url)!} target="_blank" rel="noopener noreferrer">
+                              View Certificate
                             </a>
                           </Button>
                         )}
@@ -979,18 +1043,7 @@ const Home: React.FC = () => {
               ))}
             </div>
                     
-                    {education.length > 6 && (
-                      <div className="mt-6 pt-4 border-t border-border">
-                <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full border-purple-500/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10"
-                  asChild
-                >
-                  <a href="/education">View All Education</a>
-                </Button>
-              </div>
-                    )}
+                    
                   </Card>
                 </motion.div>
             )}
